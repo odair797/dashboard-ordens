@@ -83,13 +83,12 @@ tbody tr:last-child{border-bottom:none;}
 </header>
 <main>
 <div class="kpi-row">
-  <div class="kpi blue"><div class="label">Total de Ordens Paradas</div><div class="value">51</div><div class="sub">MP · EMB · SME — todos os status</div></div>
+  <div class="kpi blue"><div class="label">TOTAL DE ORDEM DE PRODUÇÃO NO SISTEMA</div><div class="value">51</div><div class="sub">MP · EMB · SME — todos os status</div></div>
   <div class="kpi" style="background:var(--card);border-color:var(--border);"><div class="label" style="color:var(--muted)">Matéria Prima</div><div class="value" style="color:var(--accent)">12</div><div class="sub" style="color:var(--muted)">9 env. fat. + 3 sep/conf</div></div>
   <div class="kpi purple"><div class="label">Embalagem</div><div class="value">22</div><div class="sub">OSM-4xx</div></div>
-  <div class="kpi teal"><div class="label">Ped. Produção Fábrica</div><div class="value">17</div><div class="sub">15 env. fat. + 2 sep/conf</div></div>
+  <div class="kpi teal"><div class="label">SME (PEDIDO DE PRODUÇÃO)</div><div class="value">17</div><div class="sub">15 env. fat. + 2 sep/conf</div></div>
   <div class="kpi orange"><div class="label">Pedidos de Venda</div><div class="value">6</div><div class="sub">PFA-xxx — todos os status</div></div>
   <div class="kpi red"><div class="label">Críticas (+90 dias)</div><div class="value">11</div><div class="sub">Máx: 232 dias parado</div></div>
-  <div class="kpi green"><div class="label">Faturadas</div><div class="value">6</div><div class="sub">Status: FATURADO</div></div>
   <div class="kpi" style="background:var(--card);border-color:var(--border);border-left:4px solid #2ec4b6;"><div class="label" style="color:var(--muted)">Prod. Externa</div><div class="value" style="color:#2ec4b6">11</div><div class="sub" style="color:var(--muted)">-400/-410/-495</div></div>
   <div class="kpi orange"><div class="label">Em Sep. / Conf.</div><div class="value">6</div><div class="sub">ordens em andamento</div></div>
 </div>
@@ -184,7 +183,7 @@ tbody tr:last-child{border-bottom:none;}
 </div>
 
 <div class="filters">
-  <div class="filter-group"><label>Tipo</label><select id="filtTipo"><option value="">Todos</option><option value="Matéria Prima">Matéria Prima</option><option value="Embalagem">Embalagem</option><option value="SME">Ped. Produção Fábrica</option><option value="Pedido de Venda">Pedido de Venda</option></select></div>
+  <div class="filter-group"><label>Tipo</label><select id="filtTipo"><option value="">Todos</option><option value="Matéria Prima">Matéria Prima</option><option value="Embalagem">Embalagem</option><option value="SME">SME (PEDIDO DE PRODUÇÃO)</option><option value="Pedido de Venda">Pedido de Venda</option></select></div>
   <div class="filter-group"><label>Destinatário</label><select id="filtDest"><option value="">Todos</option><option value="FÁBRICA GYP">FÁBRICA GYP</option><option value="B2C · LISA">B2C · LISA</option></select></div>
   <div class="filter-group"><label>Tempo Parado</label><select id="filtDias"><option value="">Todos</option><option value="7">Até 7 dias</option><option value="30">Até 30 dias</option><option value="60">Até 60 dias</option><option value="90+">Mais de 90 dias</option></select></div>
   <div class="filter-group"><label>Pesquisar</label><input type="text" id="filtSearch" placeholder="Pedido, produto..." style="width:200px"></div>
