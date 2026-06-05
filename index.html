@@ -312,4 +312,6 @@ function statusBadge(s){const m={'ENVIADO PARA FATURAMENTO':'background:rgba(247
 document.addEventListener('DOMContentLoaded',()=>{fillAllDestSelect();renderAll();renderCruzamento();});
 setTimeout(()=>{fillAllDestSelect();renderAll();renderCruzamento();},100);
 ['allFiltTipo','allFiltDest','allFiltStatus'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',renderAll);});
-document.getElementById('allFiltSearch')&&document.getElementById('allFiltSearch').addEve
+document.getElementById('allFiltSearch')&&document.getElementById('allFiltSearch').addEventListener('input',renderAll);
+document.getElementById('btnDownloadExcel')&&document.getElementById('btnDownloadExcel').addEventListener('click',downloadExcel);
+</script></body></html>
