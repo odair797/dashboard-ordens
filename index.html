@@ -83,7 +83,7 @@ tbody tr:last-child{border-bottom:none;}
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" fill="#111111"/><line x1="21" y1="2" x2="10" y2="30" stroke="white" stroke-width="3.8" stroke-linecap="butt"/><line x1="6" y1="9" x2="16.5" y2="19" stroke="white" stroke-width="3.8" stroke-linecap="round"/><line x1="4" y1="9" x2="8.5" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
     <span>Painel <em>Ordens de Produção</em></span>
   </div>
-  <div class="meta">Atualizado em 05/06/2026  09:48</div>
+  <div class="meta">Atualizado em 05/06/2026  12:51</div>
   <div class="badge">⚠ 43 Ordens Paradas</div>
 </header>
 <main>
@@ -296,33 +296,5 @@ function downloadExcel(){
   XLSX.writeFile(wb,fname);
 }
 function renderCruzamento(){
-  const c=document.getElementById('cruzamentoBody');
-  const tMP=CRUZAMENTO.reduce((s,x)=>s+x.mp_qtd,0),tEMB=CRUZAMENTO.reduce((s,x)=>s+x.emb_qtd,0);
-  const cols=['var(--accent)','var(--purple)','var(--orange)','var(--teal)'];
-  const stColor={'ENVIADO PARA FATURAMENTO':'var(--orange)','FATURADO':'var(--green)','AG. SEPARAÇÃO':'var(--accent)','SEPARAÇÃO CONCLUÍDA':'var(--purple)','CONFERÊNCIA INICIADA':'var(--yellow)','CONFERÊNCIA CONCLUÍDA':'var(--green)'};
-  function pedidoChip(p,bgRgba,brRgba,textCol){
-    const sc=stColor[p.status]||'var(--muted)';
-    return`<div style="display:inline-flex;flex-direction:column;background:${bgRgba};border:1px solid ${brRgba};border-radius:6px;padding:3px 8px;font-size:10px;margin:2px;"><span style="font-family:monospace;color:${textCol};font-weight:600;">${p.pedido}</span><span style="color:${sc};font-size:9px;margin-top:1px;">${p.status} · ${p.dias}d</span></div>`;
-  }
-  c.innerHTML=CRUZAMENTO.map((x,i)=>{
-    const col=cols[i%cols.length];
-    return`<div style="background:var(--card2);border:1px solid var(--border);border-left:4px solid ${col};border-radius:10px;padding:16px 18px;margin-bottom:12px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
-        <span style="font-size:13px;font-weight:700;color:${col};">🔗 ${x.produto}</span>
-        <span style="background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.25);border-radius:6px;padding:2px 9px;font-size:10px;color:var(--muted);">LOTE: <strong style="color:var(--text)">${x.lote}</strong></span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:12px;align-items:start;">
-        <div><div style="font-size:10px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">🔵 MP — ${x.mp_qtd} ordem(ns) · ${x.mp_code}</div><div style="display:flex;flex-wrap:wrap;">${x.mp_pedidos.map(p=>pedidoChip(p,'rgba(79,142,247,.12)','rgba(79,142,247,.3)','var(--accent)')).join('')}</div></div>
-        <div style="text-align:center;padding-top:16px;font-size:18px;color:var(--muted)">⇄</div>
-        <div><div style="font-size:10px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">🟣 EMB — ${x.emb_qtd} ordem(ns) · ${x.emb_code}</div><div style="display:flex;flex-wrap:wrap;">${x.emb_pedidos.map(p=>pedidoChip(p,'rgba(155,114,247,.12)','rgba(155,114,247,.3)','var(--purple)')).join('')}</div></div>
-      </div>
-    </div>`;
-  }).join('')+`<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;gap:24px;flex-wrap:wrap;"><div><span style="color:var(--muted);font-size:11px">MP vinculadas: </span><strong style="color:var(--accent)">${tMP}</strong></div><div><span style="color:var(--muted);font-size:11px">EMB vinculadas: </span><strong style="color:var(--purple)">${tEMB}</strong></div><div><span style="color:var(--muted);font-size:11px">MP sem par: </span><strong style="color:var(--muted)">1</strong></div><div><span style="color:var(--muted);font-size:11px">EMB sem par: </span><strong style="color:var(--muted)">11</strong></div></div>`;
-}
-function statusBadge(s){const m={'ENVIADO PARA FATURAMENTO':'background:rgba(247,152,74,.18);color:var(--orange)','FATURADO':'background:rgba(46,204,135,.18);color:var(--green)','AG. SEPARAÇÃO':'background:rgba(79,142,247,.18);color:var(--accent)','SEPARAÇÃO CONCLUÍDA':'background:rgba(155,114,247,.18);color:var(--purple)','CONFERÊNCIA INICIADA':'background:rgba(247,201,72,.18);color:var(--yellow)','CONFERÊNCIA CONCLUÍDA':'background:rgba(46,204,135,.18);color:var(--green)'};const st=m[s]||'background:rgba(136,146,170,.18);color:var(--muted)';return`<span style="${st};border-radius:6px;padding:2px 8px;font-size:10px;font-weight:600;">${s}</span>`;}
-document.addEventListener('DOMContentLoaded',()=>{fillAllDestSelect();renderAll();renderCruzamento();});
-setTimeout(()=>{fillAllDestSelect();renderAll();renderCruzamento();},100);
-['allFiltTipo','allFiltDest','allFiltStatus'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',renderAll);});
-document.getElementById('allFiltSearch')&&document.getElementById('allFiltSearch').addEventListener('input',renderAll);
-document.getElementById('btnDownloadExcel')&&document.getElementById('btnDownloadExcel').addEventListener('click',downloadExcel);
+  codocument.getElementById('btnDownloadExcel')&&document.getElementById('btnDownloadExcel').addEventListener('click',downloadExcel);
 </script></body></html>
