@@ -112,7 +112,7 @@ tbody tr:last-child{border-bottom:none;}
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" fill="#111111"/><line x1="21" y1="2" x2="10" y2="30" stroke="white" stroke-width="3.8" stroke-linecap="butt"/><line x1="6" y1="9" x2="16.5" y2="19" stroke="white" stroke-width="3.8" stroke-linecap="round"/><line x1="4" y1="9" x2="8.5" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
     <span>Painel <em>Ordens de Produção</em></span>
   </div>
-  <div class="meta">Atualizado em 06/06/2026  16:32</div>
+  <div class="meta">Atualizado em 06/06/2026  16:36</div>
   <div class="badge">⚠ 34 Ordens Paradas</div>
 </header>
 <div class="tab-bar">
@@ -289,17 +289,17 @@ tbody tr:last-child{border-bottom:none;}
   </div>
   <div class="exp-filter-bar">
     <label>Categoria</label>
-    <select id="expFiltCat" onchange="expUpdateDest(this.value);expBuildChart();">
+    <select id="expFiltCat">
       <option value="todos">🌐 Todos</option>
       <option value="exportacao">🌍 Exportação</option>
       <option value="brasil">🇧🇷 Pedido Brasil</option>
       <option value="fabrica">🏭 Pedido Fábrica</option>
     </select>
     <label>Destinatário</label>
-    <select id="expFiltDest" onchange="expBuildChart();">
+    <select id="expFiltDest">
       <option value="todos">Todos os destinatários</option>
     </select>
-    <button onclick="expResetFiltros()" style="background:var(--bg);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;">↺ Limpar</button>
+    <button id="expBtnLimpar" style="background:var(--bg);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;">↺ Limpar</button>
     <span id="expFiltInfo" style="color:var(--muted);font-size:11px;margin-left:auto;"></span>
   </div>
   <div class="flag-chips" id="expFlagChips"></div>
@@ -451,6 +451,14 @@ function expResetFiltros(){document.getElementById('expFiltCat').value='todos';e
 
 expUpdateDest('todos');
 expBuildChart();
+
+// Event listeners dos filtros (dentro do IIFE para acessar funções locais)
+document.getElementById('expFiltCat').addEventListener('change', function(){
+  expUpdateDest(this.value);
+  expBuildChart();
+});
+document.getElementById('expFiltDest').addEventListener('change', expBuildChart);
+document.getElementById('expBtnLimpar').addEventListener('click', expResetFiltros);
 })();
 </script>
 <script>
