@@ -112,7 +112,7 @@ tbody tr:last-child{border-bottom:none;}
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" fill="#111111"/><line x1="21" y1="2" x2="10" y2="30" stroke="white" stroke-width="3.8" stroke-linecap="butt"/><line x1="6" y1="9" x2="16.5" y2="19" stroke="white" stroke-width="3.8" stroke-linecap="round"/><line x1="4" y1="9" x2="8.5" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
     <span>Painel <em>Ordens de Produção</em></span>
   </div>
-  <div class="meta">Atualizado em 06/06/2026  16:41</div>
+  <div class="meta">Atualizado em 06/06/2026  16:50</div>
   <div class="badge">⚠ 34 Ordens Paradas</div>
 </header>
 <div class="tab-bar">
@@ -354,9 +354,8 @@ function expFlagHtml(dest, px) {
   if (!info.code) return '<span style="font-size:'+px+'px;vertical-align:middle;">'+info.emoji+'</span>';
   var w = px <= 24 ? 20 : 40;
   return '<img src="https://flagcdn.com/w'+w+'/'+info.code+'.png" width="'+px+'" height="'+Math.round(px*0.65)+'" '+
-    'onerror="this.style.display='none';this.nextSibling.style.display='inline';" '+
     'style="border-radius:2px;object-fit:cover;display:inline-block;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,.15);" '+
-    'alt="'+info.emoji+'"><span style="display:none;font-size:'+px+'px;vertical-align:middle;">'+info.emoji+'</span>';
+    'alt="'+info.emoji+'">';
 }
 
 function expGetDests(cat) {
@@ -503,23 +502,37 @@ function expInitPaletes() {
     var total = EXP_DATA.paletes_values[i] || 0;
     var div = document.createElement('div');
     div.className = 'pm';
+    var itemsHtml = items.map(function(it) {
+      return '<div class="pm-item">' +
+        '<div>' +
+          '<div style="font-size:12px;color:var(--text);">🏢 ' + it.dest + '</div>' +
+          '<div style="font-size:10px;color:var(--muted);">🌍 ' + it.pais + '</div>' +
+        '</div>' +
+        '<div style="text-align:right;">' +
+          '<div style="font-size:20px;font-weight:700;color:var(--teal);">' + it.vol + '</div>' +
+          '<div style="font-size:10px;color:var(--muted);">volumes</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
     div.innerHTML =
-      '<div class="pm-hdr" onclick="this.nextSibling.classList.toggle('open');'+
-      'this.querySelector('.arr').textContent=this.nextSibling.classList.contains('open')?'▲':'▼';">'+
-      '<div style="display:flex;align-items:center;gap:12px;"><span style="font-size:16px;">📦</span>'+
-      '<span style="font-size:13px;font-weight:700;">'+mes+'</span></div>'+
-      '<div style="display:flex;align-items:center;gap:10px;">'+
-      '<span style="background:rgba(46,196,182,.15);color:var(--teal);border:1px solid rgba(46,196,182,.3);'+
-      'border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;">'+total+' volumes</span>'+
-      '<span class="arr" style="color:var(--muted);font-size:12px;">▼</span></div></div>'+
-      '<div class="pm-detail">'+items.map(function(it) {
-        return '<div class="pm-item">'+
-          '<div><div style="font-size:12px;color:var(--text);">🏢 '+it.dest+'</div>'+
-          '<div style="font-size:10px;color:var(--muted);">🌍 '+it.pais+'</div></div>'+
-          '<div style="text-align:right;">'+
-          '<div style="font-size:20px;font-weight:700;color:var(--teal);">'+it.vol+'</div>'+
-          '<div style="font-size:10px;color:var(--muted);">volumes</div></div></div>';
-      }).join('')+'</div>';
+      '<div class="pm-hdr">' +
+        '<div style="display:flex;align-items:center;gap:12px;">' +
+          '<span style="font-size:16px;">📦</span>' +
+          '<span style="font-size:13px;font-weight:700;">' + mes + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<span style="background:rgba(46,196,182,.15);color:var(--teal);border:1px solid rgba(46,196,182,.3);' +
+            'border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;">' + total + ' volumes</span>' +
+          '<span class="arr" style="color:var(--muted);font-size:12px;">▼</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pm-detail">' + itemsHtml + '</div>';
+    div.querySelector('.pm-hdr').addEventListener('click', function() {
+      var detail = this.nextElementSibling;
+      var arr    = this.querySelector('.arr');
+      detail.classList.toggle('open');
+      arr.textContent = detail.classList.contains('open') ? '▲' : '▼';
+    });
     tbl.appendChild(div);
   });
 }
