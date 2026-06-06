@@ -112,7 +112,7 @@ tbody tr:last-child{border-bottom:none;}
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" fill="#111111"/><line x1="21" y1="2" x2="10" y2="30" stroke="white" stroke-width="3.8" stroke-linecap="butt"/><line x1="6" y1="9" x2="16.5" y2="19" stroke="white" stroke-width="3.8" stroke-linecap="round"/><line x1="4" y1="9" x2="8.5" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
     <span>Painel <em>Ordens de Produção</em></span>
   </div>
-  <div class="meta">Atualizado em 06/06/2026  16:36</div>
+  <div class="meta">Atualizado em 06/06/2026  16:41</div>
   <div class="badge">⚠ 34 Ordens Paradas</div>
 </header>
 <div class="tab-bar">
@@ -318,148 +318,233 @@ tbody tr:last-child{border-bottom:none;}
 </div>
 
 <script>
-(function(){
-const EXP = {"labels": ["Fev/26", "Mar/26", "Abr/26", "Mai/26", "Jun/26"], "months": ["2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "mp": [0, 79, 92, 83, 2], "emb": [6, 65, 74, 77, 1], "sme": [32, 72, 75, 87, 0], "pdv": [47, 67, 51, 76, 9], "pdv_dests": ["B2C", "Exportação · Argentina", "Exportação · Chile", "Exportação · Colômbia", "Exportação · EUA", "Exportação · França", "Exportação · Internacional", "Exportação · Panamá", "FÁBRICA GYP", "IZABELE MARTINS FROEDE", "Top Distribuidora"], "pdv_by_dest": {"B2C": [40, 52, 39, 66, 2], "Exportação · Argentina": [0, 0, 1, 0, 0], "Exportação · Chile": [0, 3, 1, 1, 0], "Exportação · Colômbia": [0, 2, 0, 0, 0], "Exportação · EUA": [0, 5, 1, 3, 0], "Exportação · França": [0, 0, 0, 2, 0], "Exportação · Internacional": [0, 0, 2, 1, 1], "Exportação · Panamá": [1, 0, 1, 0, 0], "FÁBRICA GYP": [0, 0, 0, 0, 3], "IZABELE MARTINS FROEDE": [0, 0, 1, 0, 0], "Top Distribuidora": [6, 5, 5, 3, 3]}, "paises": ["Argentina", "Chile", "Colômbia", "EUA", "França", "Internacional", "Panamá"], "pais_by_mes": {"Argentina": [0, 0, 1, 0, 0], "Chile": [0, 3, 1, 1, 0], "Colômbia": [0, 2, 0, 0, 0], "EUA": [0, 5, 1, 3, 0], "França": [0, 0, 0, 2, 0], "Internacional": [0, 0, 2, 1, 1], "Panamá": [1, 0, 1, 0, 0]}, "paletes_values": [2, 22, 7, 31, 1], "paletes_detail": {"Fev/26": [{"dest": "AVILA SPA PANAMA", "pais": "Panamá", "vol": 2}], "Mar/26": [{"dest": "YBERA USA", "pais": "EUA", "vol": 16}, {"dest": "CHILENA DE BELLEZA SPA", "pais": "Chile", "vol": 4}, {"dest": "DOMINGUEZ COMERCIANTES S.A.S", "pais": "Colômbia", "vol": 2}], "Abr/26": [{"dest": "YBERA USA", "pais": "EUA", "vol": 2}, {"dest": "KOSMOPROF", "pais": "Internacional", "vol": 1}, {"dest": "DIEGO JULIAN FAMIGLIETTI", "pais": "Argentina", "vol": 1}, {"dest": "AVILA SPA PANAMA", "pais": "Panamá", "vol": 1}, {"dest": "CHILENA DE BELLEZA SPA", "pais": "Chile", "vol": 1}, {"dest": "G.Y.P", "pais": "Internacional", "vol": 1}], "Mai/26": [{"dest": "YBERA USA", "pais": "EUA", "vol": 27}, {"dest": "ESPACE COIFFURE DALIDA", "pais": "França", "vol": 2}, {"dest": "CHILENA DE BELLEZA SPA", "pais": "Chile", "vol": 1}, {"dest": "EUN YONG CHUNG", "pais": "Internacional", "vol": 1}], "Jun/26": [{"dest": "G.Y.P", "pais": "Internacional", "vol": 1}]}, "totais": {"total": 1131, "mp": 256, "emb": 223, "sme": 266, "pdv": 250, "vol": 63}};
+// ── EXPEDIDO: variáveis e funções globais ──────────────────────
+var EXP_DATA = {"labels": ["Fev/26", "Mar/26", "Abr/26", "Mai/26", "Jun/26"], "months": ["2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "mp": [0, 79, 92, 83, 2], "emb": [6, 65, 74, 77, 1], "sme": [32, 72, 75, 87, 0], "pdv": [47, 67, 51, 76, 9], "pdv_dests": ["B2C", "Exportação · Argentina", "Exportação · Chile", "Exportação · Colômbia", "Exportação · EUA", "Exportação · França", "Exportação · Internacional", "Exportação · Panamá", "FÁBRICA GYP", "IZABELE MARTINS FROEDE", "Top Distribuidora"], "pdv_by_dest": {"B2C": [40, 52, 39, 66, 2], "Exportação · Argentina": [0, 0, 1, 0, 0], "Exportação · Chile": [0, 3, 1, 1, 0], "Exportação · Colômbia": [0, 2, 0, 0, 0], "Exportação · EUA": [0, 5, 1, 3, 0], "Exportação · França": [0, 0, 0, 2, 0], "Exportação · Internacional": [0, 0, 2, 1, 1], "Exportação · Panamá": [1, 0, 1, 0, 0], "FÁBRICA GYP": [0, 0, 0, 0, 3], "IZABELE MARTINS FROEDE": [0, 0, 1, 0, 0], "Top Distribuidora": [6, 5, 5, 3, 3]}, "paises": ["Argentina", "Chile", "Colômbia", "EUA", "França", "Internacional", "Panamá"], "pais_by_mes": {"Argentina": [0, 0, 1, 0, 0], "Chile": [0, 3, 1, 1, 0], "Colômbia": [0, 2, 0, 0, 0], "EUA": [0, 5, 1, 3, 0], "França": [0, 0, 0, 2, 0], "Internacional": [0, 0, 2, 1, 1], "Panamá": [1, 0, 1, 0, 0]}, "paletes_values": [2, 22, 7, 31, 1], "paletes_detail": {"Fev/26": [{"dest": "AVILA SPA PANAMA", "pais": "Panamá", "vol": 2}], "Mar/26": [{"dest": "YBERA USA", "pais": "EUA", "vol": 16}, {"dest": "CHILENA DE BELLEZA SPA", "pais": "Chile", "vol": 4}, {"dest": "DOMINGUEZ COMERCIANTES S.A.S", "pais": "Colômbia", "vol": 2}], "Abr/26": [{"dest": "YBERA USA", "pais": "EUA", "vol": 2}, {"dest": "KOSMOPROF", "pais": "Internacional", "vol": 1}, {"dest": "DIEGO JULIAN FAMIGLIETTI", "pais": "Argentina", "vol": 1}, {"dest": "AVILA SPA PANAMA", "pais": "Panamá", "vol": 1}, {"dest": "CHILENA DE BELLEZA SPA", "pais": "Chile", "vol": 1}, {"dest": "G.Y.P", "pais": "Internacional", "vol": 1}], "Mai/26": [{"dest": "YBERA USA", "pais": "EUA", "vol": 27}, {"dest": "ESPACE COIFFURE DALIDA", "pais": "França", "vol": 2}, {"dest": "CHILENA DE BELLEZA SPA", "pais": "Chile", "vol": 1}, {"dest": "EUN YONG CHUNG", "pais": "Internacional", "vol": 1}], "Jun/26": [{"dest": "G.Y.P", "pais": "Internacional", "vol": 1}]}, "totais": {"total": 1131, "mp": 256, "emb": 223, "sme": 266, "pdv": 250, "vol": 63}};
+var expPVChart = null;
+var expIniciado = false;
 
-// helpers Chart
-const gridColor = '#2a2f45';
-function barOpts(label, color){
-  return {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} ordens`}}},
-    scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor},beginAtZero:true,ticks:{precision:0}}}
-  };
-}
-
-function mkBar(id, data, color){
-  new Chart(document.getElementById(id),{
-    type:'bar',
-    data:{labels:EXP.labels,datasets:[{data:data,backgroundColor:color+'bb',borderColor:color,borderWidth:1,borderRadius:6}]},
-    options:barOpts()
-  });
-}
-
-mkBar('expChartMP',  EXP.mp,  '#4f8ef7');
-mkBar('expChartEMB', EXP.emb, '#9b72f7');
-mkBar('expChartSME', EXP.sme, '#f7c948');
-mkBar('expChartPDV', EXP.pdv, '#f7984a');
-
-// PV filtrado
-const EXP_CATS = {
-  exportacao: EXP.pdv_dests.filter(d=>d.startsWith('Exportação')),
-  brasil:     EXP.pdv_dests.filter(d=>d==='B2C'||d==='Top Distribuidora'||d==='Izabele Martins Froede'),
-  fabrica:    EXP.pdv_dests.filter(d=>d==='FÁBRICA GYP'),
+var EXP_CATS = {
+  exportacao: EXP_DATA.pdv_dests.filter(function(d){ return d.indexOf('Exporta') === 0; }),
+  brasil:     ['B2C','Top Distribuidora','Izabele Martins Froede'],
+  fabrica:    ['FÁBRICA GYP']
 };
-const EXP_COLORS = {'B2C':'#4f8ef7','Top Distribuidora':'#2ecc87','FÁBRICA GYP':'#2ec4b6','Izabele Martins Froede':'#c975e4',
-  'Exportação · EUA':'#f7984a','Exportação · Chile':'#e05c5c','Exportação · Colômbia':'#9b72f7',
-  'Exportação · França':'#f7c948','Exportação · Argentina':'#7bc8f5','Exportação · Panamá':'#a8e6cf',
-  'Exportação · Bolívia':'#2ec4b6','Exportação · Colômbia':'#9b72f7','Exportação · México':'#ff9ff3',
-  'Exportação · Peru':'#feca57','Exportação · Internacional':'#8892aa'};
-const FLAG_INFO = {'Exportação · EUA':{code:'us',emoji:'🇺🇸'},'Exportação · Chile':{code:'cl',emoji:'🇨🇱'},
-  'Exportação · Colômbia':{code:'co',emoji:'🇨🇴'},'Exportação · França':{code:'fr',emoji:'🇫🇷'},
-  'Exportação · Argentina':{code:'ar',emoji:'🇦🇷'},'Exportação · Panamá':{code:'pa',emoji:'🇵🇦'},
-  'Exportação · Bolívia':{code:'bo',emoji:'🇧🇴'},'Exportação · México':{code:'mx',emoji:'🇲🇽'},
-  'Exportação · Peru':{code:'pe',emoji:'🇵🇪'},'Exportação · Internacional':{code:null,emoji:'🌐'}};
 
-function flagImg(d,px){
-  const info=FLAG_INFO[d];if(!info)return '';
-  if(!info.code)return `<span style="font-size:${px}px;line-height:1;vertical-align:middle;">${info.emoji}</span>`;
-  const w=px<=24?20:40;
-  return `<img src="https://flagcdn.com/w${w}/${info.code}.png" width="${px}" height="${Math.round(px*0.65)}"
-    onerror="this.style.display='none';this.nextSibling.style.display='inline';"
-    style="border-radius:2px;object-fit:cover;display:inline-block;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,.15);"
-    alt="${info.emoji}"><span style="display:none;font-size:${px}px;line-height:1;vertical-align:middle;">${info.emoji}</span>`;
+var EXP_COLORS = {
+  'B2C':'#4f8ef7','Top Distribuidora':'#2ecc87','FÁBRICA GYP':'#2ec4b6',
+  'Izabele Martins Froede':'#c975e4',
+  'Exportação · EUA':'#f7984a','Exportação · Chile':'#e05c5c',
+  'Exportação · Colômbia':'#9b72f7','Exportação · França':'#f7c948',
+  'Exportação · Argentina':'#7bc8f5','Exportação · Panamá':'#a8e6cf',
+  'Exportação · Internacional':'#8892aa'
+};
+
+var EXP_FLAGS = {
+  'Exportação · EUA':      {code:'us', emoji:'🇺🇸'},
+  'Exportação · Chile':    {code:'cl', emoji:'🇨🇱'},
+  'Exportação · Colômbia': {code:'co', emoji:'🇨🇴'},
+  'Exportação · França':   {code:'fr', emoji:'🇫🇷'},
+  'Exportação · Argentina':{code:'ar', emoji:'🇦🇷'},
+  'Exportação · Panamá':   {code:'pa', emoji:'🇵🇦'},
+  'Exportação · Internacional':{code:null, emoji:'🌐'}
+};
+
+function expFlagHtml(dest, px) {
+  var info = EXP_FLAGS[dest];
+  if (!info) return '';
+  if (!info.code) return '<span style="font-size:'+px+'px;vertical-align:middle;">'+info.emoji+'</span>';
+  var w = px <= 24 ? 20 : 40;
+  return '<img src="https://flagcdn.com/w'+w+'/'+info.code+'.png" width="'+px+'" height="'+Math.round(px*0.65)+'" '+
+    'onerror="this.style.display='none';this.nextSibling.style.display='inline';" '+
+    'style="border-radius:2px;object-fit:cover;display:inline-block;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,.15);" '+
+    'alt="'+info.emoji+'"><span style="display:none;font-size:'+px+'px;vertical-align:middle;">'+info.emoji+'</span>';
 }
 
-function expGetDests(cat){
-  if(cat==='todos') return EXP.pdv_dests;
-  return EXP_CATS[cat]||[];
-}
-function expUpdateDest(cat){
-  const sel=document.getElementById('expFiltDest');
-  const dests=expGetDests(cat);
-  sel.innerHTML='<option value="todos">Todos os destinatários</option>';
-  dests.forEach(d=>{sel.innerHTML+=`<option value="${d}">${d}</option>`;});
+function expGetDests(cat) {
+  if (cat === 'todos') return EXP_DATA.pdv_dests;
+  return EXP_CATS[cat] || [];
 }
 
-let expPVChart=null;
-function expBuildChart(){
-  const cat=document.getElementById('expFiltCat').value;
-  const dest=document.getElementById('expFiltDest').value;
-  let dests=expGetDests(cat).filter(d=>EXP.pdv_by_dest[d]);
-  if(dest!=='todos') dests=dests.filter(d=>d===dest);
-  const total=dests.reduce((s,d)=>s+EXP.pdv_by_dest[d].reduce((a,b)=>a+b,0),0);
-  const catLabel={todos:'Todos',exportacao:'Exportação',brasil:'Pedido Brasil',fabrica:'Pedido Fábrica'}[cat];
-  document.getElementById('pvExpBadge').textContent=dest!=='todos'?dest:catLabel;
-  document.getElementById('expFiltInfo').textContent=`${total} pedidos no período`;
-  const datasets=dests.map(d=>({
-    label:d,data:EXP.pdv_by_dest[d],
-    backgroundColor:(EXP_COLORS[d]||'#8892aa')+'cc',
-    borderColor:EXP_COLORS[d]||'#8892aa',borderWidth:1,borderRadius:5
-  }));
-  // legenda
-  const leg=document.getElementById('expLegendPV');
-  leg.innerHTML=dests.map(d=>{
-    const hasFlag=FLAG_INFO.hasOwnProperty(d);
-    const label=d.replace('Exportação · ','');
-    if(hasFlag)return `<div class="exp-legend-item" style="align-items:center;gap:6px;">${flagImg(d,18)}<span style="color:var(--text);font-weight:600;">${label}</span><span style="width:8px;height:8px;border-radius:50%;background:${EXP_COLORS[d]||'#8892aa'};display:inline-block;"></span></div>`;
-    return `<div class="exp-legend-item"><div class="exp-legend-dot" style="background:${EXP_COLORS[d]||'#8892aa'}"></div>${d}</div>`;
-  }).join('');
-  // chips bandeiras
-  const chips=document.getElementById('expFlagChips');
-  const expD=dests.filter(d=>FLAG_INFO.hasOwnProperty(d)&&EXP.pdv_by_dest[d]&&EXP.pdv_by_dest[d].reduce((a,b)=>a+b,0)>0);
-  if(expD.length>0){
-    chips.style.display='flex';
-    chips.innerHTML=expD.map(d=>{
-      const label=d.replace('Exportação · ','');
-      const tot=EXP.pdv_by_dest[d].reduce((a,b)=>a+b,0);
-      const cor=EXP_COLORS[d]||'#8892aa';
-      return `<div style="display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid ${cor}44;border-left:3px solid ${cor};border-radius:8px;padding:8px 14px;min-width:110px;">
-        <div style="font-size:28px;line-height:1;">${flagImg(d,28)}</div>
-        <div><div style="font-size:12px;font-weight:700;color:var(--text);">${label}</div><div style="font-size:11px;color:${cor};font-weight:600;">${tot} pedidos</div></div>
-      </div>`;
-    }).join('');
-  } else { chips.style.display='none'; }
-  if(expPVChart) expPVChart.destroy();
-  expPVChart=new Chart(document.getElementById('expChartPVFiltrado'),{
-    type:'bar',data:{labels:EXP.labels,datasets},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw>0?` ${ctx.dataset.label}: ${ctx.raw} pedidos`:null,filter:item=>item.raw>0}}},
-      scales:{x:{grid:{color:'#2a2f45'}},y:{grid:{color:'#2a2f45'},beginAtZero:true,ticks:{precision:0}}}}
+function expUpdateDest(cat) {
+  var sel = document.getElementById('expFiltDest');
+  if (!sel) return;
+  var dests = expGetDests(cat);
+  sel.innerHTML = '<option value="todos">Todos os destinatários</option>';
+  dests.forEach(function(d) {
+    sel.innerHTML += '<option value="'+d+'">'+d+'</option>';
   });
 }
-function expResetFiltros(){document.getElementById('expFiltCat').value='todos';expUpdateDest('todos');expBuildChart();}
 
-// Paletes table
-(function(){
-  const tbl=document.getElementById('expPaletesTbl');
-  if(!tbl)return;
-  EXP.labels.forEach((mes,i)=>{
-    const items=EXP.paletes_detail[mes]||[];
-    const total=EXP.paletes_values[i]||0;
-    const div=document.createElement('div');div.className='pm';
-    div.innerHTML=`<div class="pm-hdr" onclick="this.nextSibling.classList.toggle('open');this.querySelector('.arr').textContent=this.nextSibling.classList.contains('open')?'▲':'▼';">
-      <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:16px;">📦</span><span style="font-size:13px;font-weight:700;">${mes}</span></div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="background:rgba(46,196,182,.15);color:var(--teal);border:1px solid rgba(46,196,182,.3);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;">${total} volumes</span>
-        <span class="arr" style="color:var(--muted);font-size:12px;">▼</span>
-      </div></div>
-    <div class="pm-detail">${items.map(it=>`<div class="pm-item"><div><div style="font-size:12px;color:var(--text);">🏢 ${it.dest}</div><div style="font-size:10px;color:var(--muted);">🌍 ${it.pais}</div></div><div style="text-align:right;"><div style="font-size:20px;font-weight:700;color:var(--teal);">${it.vol}</div><div style="font-size:10px;color:var(--muted);">volumes</div></div></div>`).join('')}</div>`;
+function expBuildChart() {
+  var cat  = document.getElementById('expFiltCat').value;
+  var dest = document.getElementById('expFiltDest').value;
+  var dests = expGetDests(cat).filter(function(d) { return EXP_DATA.pdv_by_dest[d]; });
+  if (dest !== 'todos') dests = dests.filter(function(d) { return d === dest; });
+
+  var total = dests.reduce(function(s,d) {
+    return s + EXP_DATA.pdv_by_dest[d].reduce(function(a,b){return a+b;}, 0);
+  }, 0);
+
+  var labels = {todos:'Todos', exportacao:'Exportação', brasil:'Pedido Brasil', fabrica:'Pedido Fábrica'};
+  var badge = document.getElementById('pvExpBadge');
+  var info  = document.getElementById('expFiltInfo');
+  if (badge) badge.textContent = dest !== 'todos' ? dest : (labels[cat]||'Todos');
+  if (info)  info.textContent  = total + ' pedidos no período';
+
+  var datasets = dests.map(function(d) {
+    return {
+      label: d,
+      data: EXP_DATA.pdv_by_dest[d],
+      backgroundColor: (EXP_COLORS[d]||'#8892aa') + 'cc',
+      borderColor: EXP_COLORS[d]||'#8892aa',
+      borderWidth: 1, borderRadius: 5
+    };
+  });
+
+  // Legenda
+  var leg = document.getElementById('expLegendPV');
+  if (leg) {
+    leg.innerHTML = dests.map(function(d) {
+      var hasFlag = EXP_FLAGS.hasOwnProperty(d);
+      var label   = d.replace('Exportação · ','');
+      if (hasFlag) {
+        return '<div class="exp-legend-item" style="align-items:center;gap:6px;">'+
+          expFlagHtml(d,18)+
+          '<span style="color:var(--text);font-weight:600;">'+label+'</span>'+
+          '<span style="width:8px;height:8px;border-radius:50%;background:'+(EXP_COLORS[d]||'#8892aa')+';display:inline-block;"></span></div>';
+      }
+      return '<div class="exp-legend-item"><div class="exp-legend-dot" style="background:'+(EXP_COLORS[d]||'#8892aa')+'"></div>'+d+'</div>';
+    }).join('');
+  }
+
+  // Chips de bandeira
+  var chips = document.getElementById('expFlagChips');
+  if (chips) {
+    var expD = dests.filter(function(d) {
+      return EXP_FLAGS.hasOwnProperty(d) && EXP_DATA.pdv_by_dest[d] &&
+             EXP_DATA.pdv_by_dest[d].reduce(function(a,b){return a+b;},0) > 0;
+    });
+    if (expD.length > 0) {
+      chips.style.display = 'flex';
+      chips.innerHTML = expD.map(function(d) {
+        var label = d.replace('Exportação · ','');
+        var tot   = EXP_DATA.pdv_by_dest[d].reduce(function(a,b){return a+b;},0);
+        var cor   = EXP_COLORS[d]||'#8892aa';
+        return '<div style="display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid '+cor+'44;'+
+               'border-left:3px solid '+cor+';border-radius:8px;padding:8px 14px;min-width:110px;">'+
+               '<div>'+expFlagHtml(d,28)+'</div>'+
+               '<div><div style="font-size:12px;font-weight:700;color:var(--text);">'+label+'</div>'+
+               '<div style="font-size:11px;color:'+cor+';font-weight:600;">'+tot+' pedidos</div></div></div>';
+      }).join('');
+    } else {
+      chips.style.display = 'none';
+    }
+  }
+
+  // Gráfico
+  var canvas = document.getElementById('expChartPVFiltrado');
+  if (!canvas) return;
+  try { if (expPVChart) { expPVChart.destroy(); expPVChart = null; } } catch(e) {}
+  expPVChart = new Chart(canvas, {
+    type: 'bar',
+    data: { labels: EXP_DATA.labels, datasets: datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          label: function(ctx) { return ctx.raw > 0 ? ' '+ctx.dataset.label+': '+ctx.raw+' pedidos' : null; },
+          filter: function(item) { return item.raw > 0; }
+        }}
+      },
+      scales: {
+        x: { grid: { color: '#2a2f45' } },
+        y: { grid: { color: '#2a2f45' }, beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+}
+
+function expResetFiltros() {
+  var cat = document.getElementById('expFiltCat');
+  if (cat) cat.value = 'todos';
+  expUpdateDest('todos');
+  expBuildChart();
+}
+
+// Inicializa gráficos de barras simples (MP/EMB/SME/PDV)
+function expInitBarras() {
+  function mkBar(id, data, color) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    new Chart(el, {
+      type: 'bar',
+      data: { labels: EXP_DATA.labels, datasets: [{
+        data: data, backgroundColor: color+'bb', borderColor: color, borderWidth: 1, borderRadius: 6
+      }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ' '+ctx.raw+' ordens'; } } } },
+        scales: { x: { grid: { color: '#2a2f45' } }, y: { grid: { color: '#2a2f45' }, beginAtZero: true } }
+      }
+    });
+  }
+  mkBar('expChartMP',  EXP_DATA.mp,  '#4f8ef7');
+  mkBar('expChartEMB', EXP_DATA.emb, '#9b72f7');
+  mkBar('expChartSME', EXP_DATA.sme, '#f7c948');
+  mkBar('expChartPDV', EXP_DATA.pdv, '#f7984a');
+}
+
+// Inicializa tabela de paletes
+function expInitPaletes() {
+  var tbl = document.getElementById('expPaletesTbl');
+  if (!tbl) return;
+  EXP_DATA.labels.forEach(function(mes, i) {
+    var items = EXP_DATA.paletes_detail[mes] || [];
+    var total = EXP_DATA.paletes_values[i] || 0;
+    var div = document.createElement('div');
+    div.className = 'pm';
+    div.innerHTML =
+      '<div class="pm-hdr" onclick="this.nextSibling.classList.toggle('open');'+
+      'this.querySelector('.arr').textContent=this.nextSibling.classList.contains('open')?'▲':'▼';">'+
+      '<div style="display:flex;align-items:center;gap:12px;"><span style="font-size:16px;">📦</span>'+
+      '<span style="font-size:13px;font-weight:700;">'+mes+'</span></div>'+
+      '<div style="display:flex;align-items:center;gap:10px;">'+
+      '<span style="background:rgba(46,196,182,.15);color:var(--teal);border:1px solid rgba(46,196,182,.3);'+
+      'border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;">'+total+' volumes</span>'+
+      '<span class="arr" style="color:var(--muted);font-size:12px;">▼</span></div></div>'+
+      '<div class="pm-detail">'+items.map(function(it) {
+        return '<div class="pm-item">'+
+          '<div><div style="font-size:12px;color:var(--text);">🏢 '+it.dest+'</div>'+
+          '<div style="font-size:10px;color:var(--muted);">🌍 '+it.pais+'</div></div>'+
+          '<div style="text-align:right;">'+
+          '<div style="font-size:20px;font-weight:700;color:var(--teal);">'+it.vol+'</div>'+
+          '<div style="font-size:10px;color:var(--muted);">volumes</div></div></div>';
+      }).join('')+'</div>';
     tbl.appendChild(div);
   });
-})();
+}
 
-expUpdateDest('todos');
-expBuildChart();
+// Chamado pelo switchTab quando aba Expedido abre
+function expInicializar() {
+  if (expIniciado) {
+    // Já iniciado: só reconstrói o gráfico PV filtrado (pode estar com tamanho errado)
+    expBuildChart();
+    return;
+  }
+  expIniciado = true;
+  expInitBarras();
+  expInitPaletes();
+  expUpdateDest('todos');
+  expBuildChart();
+}
 
-// Event listeners dos filtros (dentro do IIFE para acessar funções locais)
-document.getElementById('expFiltCat').addEventListener('change', function(){
+// Event listeners dos filtros
+document.getElementById('expFiltCat').addEventListener('change', function() {
   expUpdateDest(this.value);
   expBuildChart();
 });
 document.getElementById('expFiltDest').addEventListener('change', expBuildChart);
 document.getElementById('expBtnLimpar').addEventListener('click', expResetFiltros);
-})();
 </script>
 <script>
 // ── TABS ──
@@ -468,6 +553,7 @@ function switchTab(id,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
+  if(id==='expedido' && typeof expInicializar==='function') expInicializar();
 }
 const RAW={"enviados": [{"pedido": "OSM-310-635/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SELANTE 1KG (GRANEL) - 3106351", "cadastrada": "19/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-636/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SELANTE 1KG (GRANEL) - 3106361", "cadastrada": "19/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-734/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SHAMPOO 300ML (GRANEL)100TIMETROS  - 3107341", "cadastrada": "19/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-731/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SHAMPOO 300ML (GRANEL)100TIMETROS  - 3107311", "cadastrada": "19/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "OSM-300-320/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "RECONSTRUTOR 500G (GRANEL) - 3003201", "cadastrada": "19/05/2026", "env_fat": "25/05/2026", "dias": 12, "cidade": "GUARAPARI"}, {"pedido": "OSM-300-322/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "ATIVO BOTULINICO BIOTOX 500G (GRANEL) - 3003221", "cadastrada": "19/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-742/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "PRE-SHAMPOO 500ML (GRANEL) - 3107421", "cadastrada": "19/05/2026", "env_fat": "25/05/2026", "dias": 12, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-759/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SHAMPOO 500ML (GRANEL) - 3107591", "cadastrada": "20/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-763/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SHAMPOO 500ML (GRANEL) - 3107631", "cadastrada": "20/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-762/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SHAMPOO 500ML (GRANEL) - 3107621", "cadastrada": "20/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-761/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SHAMPOO 500ML (GRANEL) - 3107611", "cadastrada": "20/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-760/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SHAMPOO 500ML (GRANEL) - 3107601", "cadastrada": "20/05/2026", "env_fat": "22/05/2026", "dias": 15, "cidade": "GUARAPARI"}, {"pedido": "SME-952", "tipo": "SME", "destinatario": "FÁBRICA GYP", "produto": "952", "cadastrada": "25/05/2026", "env_fat": "25/05/2026", "dias": 12, "cidade": "GUARAPARI"}, {"pedido": "SME-953", "tipo": "SME", "destinatario": "FÁBRICA GYP", "produto": "953", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-777/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SELANTE 150G (GRANEL) - 3107771", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-776/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SELANTE 150G (GRANEL) - 3107761", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-410-815/1", "tipo": "Embalagem", "destinatario": "FÁBRICA GYP", "produto": "4108151", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-410-814/1", "tipo": "Embalagem", "destinatario": "FÁBRICA GYP", "produto": "4108141", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-774/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SELANTE 150G (GRANEL) - 3107741", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-778/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SELANTE 150G (GRANEL) - 3107781", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-775/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SELANTE 150G (GRANEL) - 3107751", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-310-779/1", "tipo": "Matéria Prima", "destinatario": "FÁBRICA GYP", "produto": "SELANTE 150G (GRANEL) - 3107791", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-410-812/1", "tipo": "Embalagem", "destinatario": "FÁBRICA GYP", "produto": "4108121", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-410-811/1", "tipo": "Embalagem", "destinatario": "FÁBRICA GYP", "produto": "4108111", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-410-813/1", "tipo": "Embalagem", "destinatario": "FÁBRICA GYP", "produto": "4108131", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-410-810/1", "tipo": "Embalagem", "destinatario": "FÁBRICA GYP", "produto": "4108101", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "OSM-410-816/1", "tipo": "Embalagem", "destinatario": "FÁBRICA GYP", "produto": "ESCOVA PROGRESSIVA - SELANTE 150G - 4108161", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}, {"pedido": "SME-956", "tipo": "SME", "destinatario": "FÁBRICA GYP", "produto": "956", "cadastrada": "26/05/2026", "env_fat": "26/05/2026", "dias": 11, "cidade": "GUARAPARI"}], "monthly": {"labels": ["Mai/2026"], "total": [28]}};
 const EXT_DATA=[{"pedido": "-495-60/2", "tipo": "Prod. Externa", "destinatario": "Carvalho Cosméticos", "produto": "495602", "cadastrada": "20/05/2026", "env_fat": "21/05/2026", "status": "FATURADO", "faturado_em": "21/05/2026", "cidade": "CARIACICA", "dias": 16}, {"pedido": "-410-727/2", "tipo": "Prod. Externa", "destinatario": "Mac Paul Cosméticos", "produto": "CACHO PERFEITO - MÁSCARA MACIEZ INTENSA 250G (FORA DO ESTADO) - 4107272", "cadastrada": "20/05/2026", "env_fat": "21/05/2026", "status": "ENVIADO PARA FATURAMENTO", "faturado_em": "", "cidade": "JAGUARIÚNA", "dias": 16}, {"pedido": "-410-770/2", "tipo": "Prod. Externa", "destinatario": "Mac Paul Cosméticos", "produto": "CACHO PERFEITO - MÁSCARA MACIEZ INTENSA 250G (FORA DO ESTADO) - 4107702", "cadastrada": "20/05/2026", "env_fat": "21/05/2026", "status": "ENVIADO PARA FATURAMENTO", "faturado_em": "", "cidade": "JAGUARIÚNA", "dias": 16}, {"pedido": "-495-60/1", "tipo": "Prod. Externa", "destinatario": "Carvalho Cosméticos", "produto": "495601", "cadastrada": "20/05/2026", "env_fat": "22/05/2026", "status": "FATURADO", "faturado_em": "22/05/2026", "cidade": "CARIACICA", "dias": 15}, {"pedido": "-410-727/1", "tipo": "Prod. Externa", "destinatario": "Mac Paul Cosméticos", "produto": "MÁSCARA MACIEZ INTENSA (FORA DO ESTADO) - 4107271", "cadastrada": "20/05/2026", "env_fat": "25/05/2026", "status": "ENVIADO PARA FATURAMENTO", "faturado_em": "", "cidade": "JAGUARIÚNA", "dias": 12}, {"pedido": "-410-770/1", "tipo": "Prod. Externa", "destinatario": "Mac Paul Cosméticos", "produto": "MÁSCARA MACIEZ INTENSA (FORA DO ESTADO) - 4107701", "cadastrada": "20/05/2026", "env_fat": "25/05/2026", "status": "ENVIADO PARA FATURAMENTO", "faturado_em": "", "cidade": "JAGUARIÚNA", "dias": 12}];
