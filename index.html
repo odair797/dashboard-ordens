@@ -365,6 +365,7 @@ var EXP_COLORS = {
   'Exportação · EUA':'#f7984a','Exportação · Chile':'#e05c5c',
   'Exportação · Colômbia':'#9b72f7','Exportação · França':'#f7c948',
   'Exportação · Argentina':'#7bc8f5','Exportação · Panamá':'#a8e6cf',
+  'Exportação · Bolívia':'#6db56d',
   'Exportação · Internacional':'#8892aa'
 };
 
@@ -375,7 +376,8 @@ var EXP_FLAGS = {
   'Exportação · França':   {code:'fr', emoji:'🇫🇷'},
   'Exportação · Argentina':{code:'ar', emoji:'🇦🇷'},
   'Exportação · Panamá':   {code:'pa', emoji:'🇵🇦'},
-  'Exportação · Internacional':{code:null, emoji:'🌐'}
+  'Exportação · Bolívia':       {code:'bo', emoji:'🇧🇴'},
+  'Exportação · Internacional': {code:null, emoji:'🌐'}
 };
 
 function expFlagHtml(dest, px) {
@@ -616,7 +618,7 @@ function destBadge(d){return d==='FÁBRICA GYP'?`<span class="badge-dest badge-g
 function diasPill(d){let c,i;if(d<=7){c='dias-ok';i='✓';}else if(d<=30){c='dias-warn';i='⚠';}else if(d<=90){c='dias-alert';i='🔔';}else{c='dias-crit';i='🔴';}return`<span class="dias-pill ${c}">${i} ${d}d</span>`;}
 const ALL_DATA=[].concat((typeof MP_DATA!=='undefined'?MP_DATA:[]),(typeof EMB_DATA!=='undefined'?EMB_DATA:[]),(typeof SME_DATA!=='undefined'?SME_DATA:[]),(typeof EXT_DATA!=='undefined'?EXT_DATA:[]),(typeof PDV_DATA!=='undefined'?PDV_DATA:[]));
 function fillAllDestSelect(){const sel=document.getElementById('allFiltDest');if(!sel)return;const dests=[...new Set(ALL_DATA.map(r=>r.destinatario))].sort();sel.innerHTML='<option value="">Todos</option>'+dests.map(d=>`<option value="${d}">${d}</option>`).join('');const b=document.getElementById('allKpiBadge');if(b)b.textContent=`${ALL_DATA.length} ordens`;}
-function renderAll(){const fT=document.getElementById('allFiltTipo').value,fD=document.getElementById('allFiltDest').value,fS=document.getElementById('allFiltStatus').value,fSrch=document.getElementById('allFiltSearch').value.toLowerCase().trim();let data=ALL_DATA.filter(r=>{if(fT&&r.tipo!==fT)return false;if(fD&&r.destinatario!==fD)return false;if(fS&&r.status!==fS)return false;if(fSrch&&!r.pedido.toLowerCase().includes(fSrch)&&!(r.produto||'').toLowerCase().includes(fSrch))return false;return true;});data.sort((a,b)=>(b.dias||0)-(a.dias||0));document.getElementById('allTableBody').innerHTML=data.map(r=>{const ds=r.destinatario.length>26?r.destinatario.slice(0,24)+'…':r.destinatario;const db=r.destinatario==='FÁBRICA GYP'?'<span class="badge-dest badge-gyp">🏭 FÁBRICA GYP</span>':`<span class="badge-dest badge-out">🏢 ${ds}</span>`;return`<tr><td style="font-family:monospace;font-size:11px;color:#c8d0e8">${r.pedido}</td><td>${tipoBadge(r.tipo)}</td><td>${db}</td><td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.produto||''}</td><td style="color:var(--muted)">${r.cadastrada||''}</td><td style="color:var(--muted)">${r.env_fat||''}</td><td>${statusBadge(r.status)}</td><td style="color:var(--muted)">${r.faturado_em||''}</td><td>${diasPill(r.dias||0)}</td><td style="color:var(--muted);font-size:11px">${r.cidade||''}</td></tr>`;}).join('');document.getElementById('allCount').textContent=`${data.length} ordens`;}
+function renderAll(){const fT=document.getElementById('allFiltTipo').value,fD=document.getElementById('allFiltDest').value,fS=document.getElementById('allFiltStatus').value,fSrch=document.getElementById('allFiltSearch').value.toLowerCase().trim();let data=ALL_DATA.filter(r=>{if(fT&&r.tipo!==fT)return false;if(fD&&r.destinatario!==fD)return false;if(fS&&r.status!==fS)return false;if(fSrch&&!r.pedido.toLowerCase().includes(fSrch)&&!(r.produto||'').toLowerCase().includes(fSrch))return false;return true;});data.sort((a,b)=>(b.dias||0)-(a.dias||0));document.getElementById('allTableBody').innerHTML=data.map(r=>{const ds=r.destinatario.length>26?r.destinatario.slice(0,24)+'…':r.destinatario;const db=r.destinatario==='FÁBRICA GYP'?'<span class="badge-dest badge-gyp">🏭 FÁBRICA GYP</span>':`<span class="badge-dest badge-out">🏢 ${ds}</span>`;return`<tr><td style="font-family:monospace;font-size:11px;color:var(--accent)">${r.pedido}</td><td>${tipoBadge(r.tipo)}</td><td>${db}</td><td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.produto||''}</td><td style="color:var(--muted)">${r.cadastrada||''}</td><td style="color:var(--muted)">${r.env_fat||''}</td><td>${statusBadge(r.status)}</td><td style="color:var(--muted)">${r.faturado_em||''}</td><td>${diasPill(r.dias||0)}</td><td style="color:var(--muted);font-size:11px">${r.cidade||''}</td></tr>`;}).join('');document.getElementById('allCount').textContent=`${data.length} ordens`;}
 function downloadExcel(){
   if(typeof XLSX==='undefined'){alert('Biblioteca XLSX nao carregada. Recarregue a pagina.');return;}
   const cols=['pedido','tipo','destinatario','produto','cadastrada','env_fat','status','faturado_em','dias','cidade'];
