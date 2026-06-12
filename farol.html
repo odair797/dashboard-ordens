@@ -1710,28 +1710,97 @@ function habilitarPublicacaoExp(){
   if(btn){ btn.disabled=false; btn.className='btn-publish'; btn.textContent='🚀 Publicar Atualização'; }
 }
 
-function publicarRec(){
-  renderAll();
-  const ts=_fmtTs(new Date());
-  const btn=document.getElementById('btn-pub-rec');
-  const el=document.getElementById('rec-pub-ts');
-  if(btn){ btn.disabled=true; btn.className='btn-publish published'; btn.textContent='✅ Publicado'; }
-  if(el){ el.textContent='✅ Publicado em: '+ts; el.className='pub-timestamp ok'; }
-  const sfDate=document.getElementById('sf-date');
-  if(sfDate) sfDate.textContent=ts;
-  showToast('✅ Painel de Recebimento atualizado!');
+// ═══════ Publicação compartilhada via GitHub (token na hora) ═══════
+const GH_REPO = { owner:'odair797', repo:'dashboard-ordens', path:'farol-dados.json', branch:'main' };
+let _ultimoTs = null;
+
+function _b64utf8(str){
+  const bytes=new TextEncoder().encode(str); let bin=''; const ch=0x8000;
+  for(let i=0;i<bytes.length;i+=ch){ bin+=String.fromCharCode.apply(null, bytes.subarray(i,i+ch)); }
+  return btoa(bin);
+}
+function _snapshot(){
+  return { ts:new Date().toISOString(),
+    rec:{ byMes:STATE.byMes, byDia:STATE.byDia, alocPend:STATE.alocPend, recPend:STATE.recPend||null,
+          mesAtual:STATE.mesAtual, orsRecJun:Array.from(STATE.orsRecJun||[]) },
+    exp:{ f1:EXP_STATE.f1, f2:EXP_STATE.f2 } };
+}
+function _aplicarSnapshot(d){
+  try{
+    if(d.rec){ STATE.byMes=d.rec.byMes||{}; STATE.byDia=d.rec.byDia||{}; STATE.alocPend=d.rec.alocPend||{};
+      if(d.rec.recPend) STATE.recPend=d.rec.recPend; if(d.rec.mesAtual) STATE.mesAtual=d.rec.mesAtual;
+      STATE.orsRecJun=new Set(d.rec.orsRecJun||[]); STATE.file1ok=true; STATE.file2ok=true; }
+    if(d.exp){ EXP_STATE.f1=(d.exp.f1||[]); EXP_STATE.f2=(d.exp.f2||[]); EXP_STATE.f1ok=true; EXP_STATE.f2ok=true; }
+    if(typeof updateImportStatus==='function') updateImportStatus();
+    populateMesDropdowns(); renderAll(); expRenderAll(); expUpdateNavBadge();
+    return true;
+  }catch(e){ console.error('aplicarSnapshot',e); return false; }
+}
+async function carregarDadosRemotos(){
+  try{
+    const r=await fetch(GH_REPO.path+'?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok) return false;
+    const d=await r.json();
+    if(d && (d.rec||d.exp)){
+      _aplicarSnapshot(d); _ultimoTs=d.ts||null;
+      const ts=d.ts?_fmtTs(new Date(d.ts)):'';
+      ['rec-pub-ts','exp-pub-ts'].forEach(id=>{const el=document.getElementById(id); if(el&&ts){ el.textContent='✅ Publicado em: '+ts; el.className='pub-timestamp ok'; }});
+      return true;
+    }
+  }catch(e){ /* sem dados remotos: usa seed embutido */ }
+  return false;
+}
+function _iniciarAutoRefresh(){
+  setInterval(async ()=>{
+    try{
+      const r=await fetch(GH_REPO.path+'?t='+Date.now(),{cache:'no-store'}); if(!r.ok) return;
+      const d=await r.json();
+      if(d && d.ts && d.ts!==_ultimoTs){ _ultimoTs=d.ts; _aplicarSnapshot(d); showToast('🔄 Painel atualizado com novos dados publicados.'); }
+    }catch(e){}
+  }, 180000);
+}
+async function publicarGitHub(){
+  const token=prompt('Cole seu token do GitHub para publicar (usado só agora, não fica salvo):');
+  if(!token){ showToast('Publicação cancelada — sem token.', true); return false; }
+  const api='https://api.github.com/repos/'+GH_REPO.owner+'/'+GH_REPO.repo+'/contents/'+GH_REPO.path;
+  const headers={ 'Authorization':'Bearer '+token.trim(), 'Accept':'application/vnd.github+json' };
+  showToast('⏳ Publicando no GitHub...');
+  try{
+    let sha=null;
+    const g=await fetch(api+'?ref='+GH_REPO.branch+'&t='+Date.now(),{headers,cache:'no-store'});
+    if(g.ok){ const gj=await g.json(); sha=gj.sha; }
+    else if(g.status===401){ showToast('❌ Token inválido ou sem permissão.', true); return false; }
+    const snap=_snapshot();
+    const body={ message:'Atualiza dados do painel — '+new Date().toLocaleString('pt-BR'),
+                 content:_b64utf8(JSON.stringify(snap)), branch:GH_REPO.branch };
+    if(sha) body.sha=sha;
+    const p=await fetch(api,{method:'PUT',headers,body:JSON.stringify(body)});
+    if(p.ok){ _ultimoTs=snap.ts; showToast('✅ Publicado! Todos verão ao recarregar (até ~1 min).'); return true; }
+    const err=await p.json().catch(()=>({}));
+    showToast('❌ Falha ao publicar: '+(err.message||('HTTP '+p.status)), true); return false;
+  }catch(e){ showToast('❌ Erro de rede ao publicar no GitHub.', true); return false; }
 }
 
-function publicarExp(){
-  expRenderAll();
+async function publicarRec(){
+  renderAll();
+  const ok=await publicarGitHub();
+  if(!ok) return;
   const ts=_fmtTs(new Date());
-  const btn=document.getElementById('btn-pub-exp');
-  const el=document.getElementById('exp-pub-ts');
+  const btn=document.getElementById('btn-pub-rec'); const el=document.getElementById('rec-pub-ts');
   if(btn){ btn.disabled=true; btn.className='btn-publish published'; btn.textContent='✅ Publicado'; }
   if(el){ el.textContent='✅ Publicado em: '+ts; el.className='pub-timestamp ok'; }
-  const sfDate=document.getElementById('sf-date');
-  if(sfDate) sfDate.textContent=ts;
-  showToast('✅ Painel de Expedição atualizado!');
+  const sf=document.getElementById('sf-date'); if(sf) sf.textContent=ts;
+}
+
+async function publicarExp(){
+  expRenderAll();
+  const ok=await publicarGitHub();
+  if(!ok) return;
+  const ts=_fmtTs(new Date());
+  const btn=document.getElementById('btn-pub-exp'); const el=document.getElementById('exp-pub-ts');
+  if(btn){ btn.disabled=true; btn.className='btn-publish published'; btn.textContent='✅ Publicado'; }
+  if(el){ el.textContent='✅ Publicado em: '+ts; el.className='pub-timestamp ok'; }
+  const sf=document.getElementById('sf-date'); if(sf) sf.textContent=ts;
 }
 
 
@@ -2322,6 +2391,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if(expTs){ expTs.textContent='✅ Dados demo · '+_ts; expTs.className='pub-timestamp ok'; }
   const sfDate = document.getElementById('sf-date');
   if(sfDate) sfDate.textContent=_ts;
+  carregarDadosRemotos().then(()=>_iniciarAutoRefresh());
 });
 </script>
 </body>
