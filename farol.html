@@ -6,6 +6,19 @@
 <title>FAROL — Dashboard Operacional</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style id="print-css">
+#report-print{ display:none; }
+#report-print, #report-print *{ box-sizing:border-box; }
+@media print {
+  @page { size: A4; margin: 12mm 11mm; }
+  body{ background:#fff !important; }
+  .sidebar, .main, .toast{ display:none !important; }
+  #report-print{ display:block !important; }
+  .rp-section, .rp-card, .rp-chart, table, .rp-cover, .rp-kpis{ break-inside: avoid; page-break-inside: avoid; }
+  .rp-pagebreak{ break-before: page; page-break-before: always; }
+  thead{ display:table-header-group; }
+}
+</style>
 <style>
 /* ═══════════════════════════════════════════════════════════
    RESET & BASE
@@ -360,6 +373,11 @@ tbody tr.today-row{background:rgba(59,130,246,.06);}
     <span class="nav-icon">🚚</span>
     Expedição
     <span class="nav-badge" id="nav-badge-exp" style="background:#78350f;color:#fde68a">—</span>
+  </a>
+
+  <a class="nav-item" id="nav-analise" onclick="switchModule('analise')">
+    <span class="nav-icon">📈</span>
+    Análise Executiva
   </a>
 
   <div class="sidebar-footer">
@@ -780,6 +798,38 @@ tbody tr.today-row{background:rgba(59,130,246,.06);}
 
     </div><!-- /page -->
   </div><!-- /mod-expedicao -->
+
+  <!-- ===================== MÓDULO ANÁLISE EXECUTIVA ===================== -->
+  <div id="mod-analise" style="display:none;">
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-brand">
+        <div class="topbar-icon"><span style="font-size:20px">📈</span></div>
+        <div class="topbar-heading">
+          <span class="topbar-title">ANÁLISE EXECUTIVA</span>
+          <span class="topbar-sub">Relatórios consolidados · GYP G9</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="pub-timestamp" id="ae-pub-ts">Última atualização: —</span>
+      </div>
+    </div>
+    <div class="page">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;max-width:760px;margin:0 auto">
+        <div style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px">Relatórios para a diretoria</div>
+        <div style="font-size:.84rem;color:var(--text2);line-height:1.5;margin-bottom:22px">
+          Gere um <b>Excel unificado</b> (aba Recebimento com as Seções 1, 2 e 3; aba Expedição com Ordens Aguardando Expedição, Movimentação Diária e Paletes por país) ou um <b>PDF de apresentação</b> com todo o painel.
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <button class="btn btn-excel" style="font-size:.9rem;padding:13px 20px" onclick="gerarExcelExecutivo()">📊 Baixar Excel Executivo</button>
+          <button class="btn btn-excel" style="font-size:.9rem;padding:13px 20px;background:#7a2e2e" onclick="gerarPdfPainel()">📄 Baixar PDF (Relatório)</button>
+        </div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:18px;line-height:1.5">
+          O PDF abre a janela de impressão do navegador — escolha <b>"Salvar como PDF"</b> como destino. Os dados refletem a última atualização publicada.
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div><!-- /main -->
 
@@ -1650,6 +1700,216 @@ function expExportExcel(){
   showToast('📊 Excel de Expedição exportado!');
 }
 
+// ═══════ ANÁLISE EXECUTIVA — Excel unificado + PDF ═══════
+function gerarExcelExecutivo(){
+  try{ if(typeof renderAll==='function') renderAll(); }catch(e){}
+  const wb=XLSX.utils.book_new();
+  const mp=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const ger=new Date().toLocaleString('pt-BR');
+  const R=[];
+  R.push(['FAROL — ANÁLISE EXECUTIVA · RECEBIMENTO (Viana G9)']);
+  R.push(['Gerado em', ger]); R.push([]);
+  R.push(['Seção 1 — ORs Pendentes por Mês']);
+  R.push(['Mês','Cadastradas','Recebidas','ORs Pendentes','Acumulado','% Conclusão']);
+  (typeof s1Data!=='undefined'?s1Data:[]).forEach(d=>R.push([d.label,d.cad,d.rec,d.pend,d.acum,d.pct+'%']));
+  R.push([]);
+  R.push(['Seção 2 — Recebimentos do Mês Atual']);
+  R.push(['Data','Cadastradas','Recebidas','Pend. Recebimento','Acumulado Mês','% Conclusão']);
+  (typeof s2Data!=='undefined'?s2Data:[]).forEach(d=>R.push([d.key,d.cad,d.rec,d.pendRec,d.acum,d.pct+'%']));
+  R.push([]);
+  R.push(['Seção 3 — Pendência de Alocação']);
+  R.push(['Data (Mapa)','ORs Pendentes','Saldo Acum. (ORs)']);
+  (typeof s3Data!=='undefined'?s3Data:[]).forEach(d=>R.push([d.key,d.ors,d.saldoAcum]));
+  const wsR=XLSX.utils.aoa_to_sheet(R);
+  wsR['!cols']=[{wch:18},{wch:14},{wch:12},{wch:16},{wch:14},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsR,'Recebimento');
+  const E=[];
+  E.push(['FAROL — ANÁLISE EXECUTIVA · EXPEDIÇÃO (GYP G9)']);
+  E.push(['Gerado em', ger]); E.push([]);
+  E.push(['Ordens Finalizadas › Aguardando Expedição no Sistema — Qtde pendente por mês e família']);
+  const fat=(EXP_STATE.f1||[]).filter(o=>o.grp==='fat');
+  const famPresent=EXP_CATS_ALL.filter(c=>fat.some(o=>o.cat===c));
+  E.push(['Mês', ...famPresent.map(c=>EXP_CAT_LABEL[c]||c), 'Total']);
+  const bmf={};
+  fat.forEach(o=>{ if(!o.dataCad) return; const a=o.dataCad.split('/'); if(a.length<3||!a[2]) return; const key=a[2]+'-'+a[1]; const lbl=mp[(+a[1])-1]+'/'+a[2].slice(2); bmf[key]=bmf[key]||{label:lbl,fam:{}}; bmf[key].fam[o.cat]=(bmf[key].fam[o.cat]||0)+1; });
+  const totFam={};
+  Object.keys(bmf).sort().forEach(k=>{ const m=bmf[k]; let tot=0; const row=[m.label]; famPresent.forEach(c=>{ const v=m.fam[c]||0; row.push(v); tot+=v; totFam[c]=(totFam[c]||0)+v; }); row.push(tot); E.push(row); });
+  let gtot=0; const totRow=['TOTAL']; famPresent.forEach(c=>{ totRow.push(totFam[c]||0); gtot+=(totFam[c]||0); }); totRow.push(gtot); E.push(totRow);
+  E.push([]);
+  E.push(['Movimentação Diária — Mês Atual']);
+  E.push(['Data','Cadastrado','Separado','Finalizado','Expedido']);
+  const now=new Date(), mm=String(now.getMonth()+1).padStart(2,'0'), yy=String(now.getFullYear());
+  const cg=['emb','mp','ext','sme'], bd={}, ed=k=>{ if(!bd[k]) bd[k]={cad:0,sep:0,fin:0,exp:0}; };
+  (EXP_STATE.f1||[]).filter(o=>cg.includes(o.cat)&&o.dataCad).forEach(o=>{const a=o.dataCad.split('/'); if(a[1]!==mm||a[2]!==yy)return; const k=o.dataCad.substring(0,5); ed(k); bd[k].cad++; if(o.grp==='fat')bd[k].fin++;});
+  (EXP_STATE.f1||[]).filter(o=>cg.includes(o.cat)&&o.dataSep).forEach(o=>{const a=o.dataSep.split('/'); if(a[1]!==mm||a[2]!==yy)return; const k=o.dataSep.substring(0,5); ed(k); bd[k].sep++;});
+  (EXP_STATE.f2||[]).filter(o=>cg.includes(o.cat)&&o.dataExp).forEach(o=>{const a=o.dataExp.split('/'); if(a[1]!==mm||a[2]!==yy)return; const k=o.dataExp.substring(0,5); ed(k); bd[k].exp++;});
+  Object.keys(bd).sort((x,y)=>{const[da,ma]=x.split('/');const[db,mb]=y.split('/');return(+ma*100+ +da)-(+mb*100+ +db);}).forEach(k=>{const r=bd[k];E.push([k,r.cad,r.sep,r.fin,r.exp]);});
+  E.push([]);
+  E.push(['Paletes Enviados — Exportação por Mês (por país)']);
+  E.push(['Mês','País','Paletes (volumes)']);
+  const isTop=o=>/TOP\s+DISTRIBUIDORA/i.test(o.dest||'');
+  const bmp={};
+  (EXP_STATE.f2||[]).filter(o=>o.cat==='export'&&!isTop(o)&&o.dataExp).forEach(o=>{const p=o.dataExp.split('/'); if(p.length<3||!p[2])return; const key=p[2]+'-'+p[1]; const lbl=mp[(+p[1])-1]+'/'+p[2].slice(2); const pais=(o.pais||o.dest||'—'); bmp[key]=bmp[key]||{label:lbl,paises:{}}; bmp[key].paises[pais]=(bmp[key].paises[pais]||0)+(o.vol!=null?o.vol:1);});
+  Object.keys(bmp).sort().forEach(k=>{const m=bmp[k]; let tot=0; Object.keys(m.paises).sort((a,b)=>m.paises[b]-m.paises[a]).forEach(pn=>{E.push([m.label,pn,m.paises[pn]]); tot+=m.paises[pn];}); E.push([m.label+' — Total','',tot]); E.push([]);});
+  const wsE=XLSX.utils.aoa_to_sheet(E);
+  wsE['!cols']=[{wch:26},{wch:30},{wch:16},{wch:14},{wch:20},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,wsE,'Expedição');
+  const dt=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb,`FAROL_Analise_Executiva_${dt}.xlsx`);
+  if(typeof showToast==='function') showToast('📊 Excel Executivo gerado.');
+}
+
+const YBERA_Y_SVG='<svg viewBox="0 0 64 80" width="38" height="48" role="img" aria-label="Ybera"><g fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14 C 14 11 17.5 14 20.5 19 L 32 43"/><path d="M55 8 L 31 44"/><path d="M32 43 L 26 72"/></g></svg>';
+
+function _logoErr(img){ img.style.display='none'; var s=img.nextElementSibling; if(s) s.style.display='block'; }
+function _imgFromCanvas(id,maxh){
+  const c=document.getElementById(id);
+  if(!c||!c.width||!c.height) return '';
+  try{
+    const t=document.createElement('canvas'); t.width=c.width; t.height=c.height;
+    const x=t.getContext('2d'); x.fillStyle='#ffffff'; x.fillRect(0,0,t.width,t.height); x.drawImage(c,0,0);
+    return '<div class="rp-chart" style="margin:4px 0 16px"><img src="'+t.toDataURL('image/png')+'" style="width:100%;max-height:'+(maxh||300)+'px;object-fit:contain;border:1px solid #E2DCCB;border-radius:8px;padding:6px;background:#fff"/></div>';
+  }catch(e){ return ''; }
+}
+function _rpTable(headers,rows){
+  let h='<table style="width:100%;border-collapse:collapse;font-size:10.5px;margin:4px 0 16px">';
+  h+='<thead><tr>'+headers.map((x,i)=>'<th style="background:#1A3A5C;color:#fff;text-align:'+(i===0?'left':'center')+';padding:6px 8px;border:1px solid #1A3A5C;font-weight:700">'+x+'</th>').join('')+'</tr></thead><tbody>';
+  rows.forEach((r,ri)=>{ h+='<tr style="background:'+(ri%2?'#F7F4ED':'#fff')+'">'+r.map((c,i)=>'<td style="padding:5px 8px;border:1px solid #E2DCCB;text-align:'+(i===0?'left':'center')+';'+(i===0?'font-weight:600;color:#1A1714':'color:#1A1714')+'">'+(c==null?'':c)+'</td>').join('')+'</tr>'; });
+  h+='</tbody></table>'; return h;
+}
+function _rpKpi(label,val,sub,cor){
+  return '<div class="rp-card" style="flex:1;min-width:150px;border:1px solid #E2DCCB;border-top:3px solid '+(cor||'#28507E')+';border-radius:10px;padding:12px 14px;background:#fff"><div style="font-size:10px;color:#76695A;text-transform:uppercase;letter-spacing:.4px;font-weight:700">'+label+'</div><div style="font-size:24px;font-weight:800;color:'+(cor||'#28507E')+';line-height:1.1;margin-top:4px">'+val+'</div><div style="font-size:10px;color:#A89C85;margin-top:2px">'+(sub||'')+'</div></div>';
+}
+
+function _montarRelatorio(){
+  const mp=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mpS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const gv=id=>{const e=document.getElementById(id);return e?e.textContent.trim():'—';};
+  const hoje=new Date();
+  const ts=hoje.toLocaleDateString('pt-BR')+' '+hoje.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const ma=(STATE.mesAtual||'').split('-'); const mesLabel=ma.length===2?(mp[(+ma[1])-1]+'/'+ma[0]):'—';
+  const mesObj=STATE.byMes[STATE.mesAtual]||{cad:0,rec:0,pend:0};
+  const pctMes=mesObj.cad?Math.round(mesObj.rec/mesObj.cad*100):0;
+  let pendTot=0; let mesPior=null,mesPiorN=-1;
+  Object.entries(STATE.byMes).forEach(([k,d])=>{ pendTot+=d.pend; if(d.pend>mesPiorN){mesPiorN=d.pend;mesPior=k;} });
+  const passivo=Object.keys(STATE.alocPend||{}).length;
+  const mpL=mesPior?mpS[(+mesPior.split('-')[1])-1]+'/'+mesPior.split('-')[0].slice(2):'—';
+
+  // Expedição
+  const sm=(EXP_STATE.f1||[]).filter(o=>EXP_CATS_ALL.includes(o.cat));
+  const fat=sm.filter(o=>o.grp==='fat');
+  const nNao=sm.filter(o=>o.grp==='nao').length, nAnd=sm.filter(o=>o.grp==='and').length;
+  // fat por família
+  const famCnt={}; fat.forEach(o=>famCnt[o.cat]=(famCnt[o.cat]||0)+1);
+  const famPresent=EXP_CATS_ALL.filter(c=>famCnt[c]);
+  let famTop=null,famTopN=-1; Object.entries(famCnt).forEach(([c,n])=>{if(n>famTopN){famTopN=n;famTop=c;}});
+  // fat pivot mês x família
+  const bmf={}; fat.forEach(o=>{ if(!o.dataCad)return; const a=o.dataCad.split('/'); if(a.length<3||!a[2])return; const k=a[2]+'-'+a[1]; const lbl=mpS[(+a[1])-1]+'/'+a[2].slice(2); bmf[k]=bmf[k]||{label:lbl,fam:{}}; bmf[k].fam[o.cat]=(bmf[k].fam[o.cat]||0)+1; });
+  const fatHead=['Mês'].concat(famPresent.map(c=>EXP_CAT_LABEL[c]||c)).concat(['Total']);
+  const fatRows=[]; const totFam={}; let gtot=0;
+  Object.keys(bmf).sort().forEach(k=>{ const m=bmf[k]; let t=0; const r=[m.label]; famPresent.forEach(c=>{const v=m.fam[c]||0; r.push(v); t+=v; totFam[c]=(totFam[c]||0)+v;}); r.push('<b>'+t+'</b>'); fatRows.push(r); });
+  const totR=['<b>TOTAL</b>']; famPresent.forEach(c=>{totR.push('<b>'+(totFam[c]||0)+'</b>'); gtot+=(totFam[c]||0);}); totR.push('<b>'+gtot+'</b>'); fatRows.push(totR);
+  // movimentação diária mês atual
+  const now=new Date(), mm=String(now.getMonth()+1).padStart(2,'0'), yy=String(now.getFullYear());
+  const cg=['emb','mp','ext','sme'], bd={}, ed=k=>{if(!bd[k])bd[k]={cad:0,sep:0,fin:0,exp:0};};
+  (EXP_STATE.f1||[]).filter(o=>cg.includes(o.cat)&&o.dataCad).forEach(o=>{const a=o.dataCad.split('/');if(a[1]!==mm||a[2]!==yy)return;const k=o.dataCad.substring(0,5);ed(k);bd[k].cad++;if(o.grp==='fat')bd[k].fin++;});
+  (EXP_STATE.f1||[]).filter(o=>cg.includes(o.cat)&&o.dataSep).forEach(o=>{const a=o.dataSep.split('/');if(a[1]!==mm||a[2]!==yy)return;const k=o.dataSep.substring(0,5);ed(k);bd[k].sep++;});
+  (EXP_STATE.f2||[]).filter(o=>cg.includes(o.cat)&&o.dataExp).forEach(o=>{const a=o.dataExp.split('/');if(a[1]!==mm||a[2]!==yy)return;const k=o.dataExp.substring(0,5);ed(k);bd[k].exp++;});
+  const movRows=Object.keys(bd).sort((x,y)=>{const[da,maa]=x.split('/');const[db,mb]=y.split('/');return(+maa*100+ +da)-(+mb*100+ +db);}).map(k=>{const r=bd[k];return[k,r.cad,r.sep,r.fin,r.exp];});
+  // paletes export por país
+  const isTop=o=>/TOP\s+DISTRIBUIDORA/i.test(o.dest||'');
+  const bmp={}, paisTot={}; let palTot=0;
+  (EXP_STATE.f2||[]).filter(o=>o.cat==='export'&&!isTop(o)&&o.dataExp).forEach(o=>{const p=o.dataExp.split('/');if(p.length<3||!p[2])return;const key=p[2]+'-'+p[1];const lbl=mpS[(+p[1])-1]+'/'+p[2].slice(2);const pais=(o.pais||o.dest||'—');const v=(o.vol!=null?o.vol:1);bmp[key]=bmp[key]||{label:lbl,paises:{}};bmp[key].paises[pais]=(bmp[key].paises[pais]||0)+v;paisTot[pais]=(paisTot[pais]||0)+v;palTot+=v;});
+  const palRows=[]; Object.keys(bmp).sort().forEach(k=>{const m=bmp[k];let t=0;Object.keys(m.paises).sort((a,b)=>m.paises[b]-m.paises[a]).forEach(pn=>{palRows.push([m.label,pn,m.paises[pn]]);t+=m.paises[pn];});palRows.push(['<b>'+m.label+' — Total</b>','','<b>'+t+'</b>']);});
+  let paisTop=null,paisTopN=-1; Object.entries(paisTot).forEach(([p,n])=>{if(n>paisTopN){paisTopN=n;paisTop=p;}});
+
+  const sec=(titulo,corpo)=>'<div class="rp-section" style="margin:0 0 18px"><div style="font-size:14px;font-weight:800;color:#1A3A5C;border-bottom:2px solid #28507E;padding-bottom:5px;margin-bottom:10px">'+titulo+'</div>'+corpo+'</div>';
+  const s1=(typeof s1Data!=='undefined'?s1Data:[]).map(d=>[d.label,d.cad,d.rec,d.pend,d.acum,d.pct+'%']);
+  const s2=(typeof s2Data!=='undefined'?s2Data:[]).map(d=>[d.key,d.cad,d.rec,d.pendRec,d.acum,d.pct+'%']);
+  const s3=(typeof s3Data!=='undefined'?s3Data:[]).map(d=>[d.key,d.ors,d.saldoAcum]);
+
+  let H='';
+  // CAPA / HEADER
+  H+='<div class="rp-cover" style="background:#0a0a0a;color:#fff;border-radius:14px;padding:26px 28px;display:flex;align-items:center;gap:18px;margin-bottom:22px">'
+    +'<div style="width:66px;height:66px;background:#000;border:1px solid #333;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">'+'<img src="logo_ybera.png" alt="YBERA" style="width:100%;height:100%;object-fit:cover" onerror="_logoErr(this)"/>'+'<span style="display:none">'+YBERA_Y_SVG+'</span>'+'</div>'
+    +'<div><div style="font-size:13px;letter-spacing:3px;color:#bbb;font-weight:600">YBERA · GYP COSMÉTICOS</div>'
+    +'<div style="font-size:23px;font-weight:800;letter-spacing:.5px">Relatório Executivo Operacional</div>'
+    +'<div style="font-size:12px;color:#cfcfcf;margin-top:3px">FAROL · Unidade Viana (G9) · Recebimento &amp; Expedição</div></div>'
+    +'<div style="margin-left:auto;text-align:right;font-size:11px;color:#cfcfcf">Emitido em<br><b style="color:#fff;font-size:13px">'+ts+'</b></div></div>';
+
+  // RESUMO EXECUTIVO
+  H+=sec('Resumo Executivo',
+    '<div style="font-size:12px;color:#1A1714;line-height:1.65">'
+    +'<p style="margin:0 0 7px">No mês de <b>'+mesLabel+'</b>, foram recebidas <b>'+mesObj.rec+'</b> de <b>'+mesObj.cad+'</b> ORs cadastradas (<b>'+pctMes+'%</b> de conclusão). O total de ORs pendentes de recebimento é de <b>'+pendTot+'</b>, e o passivo de alocação soma <b>'+passivo+'</b> ORs.</p>'
+    +'<p style="margin:0 0 7px">Na expedição, <b>'+fat.length+'</b> ordens estão finalizadas aguardando expedição no sistema (<b>'+nAnd+'</b> em andamento, <b>'+nNao+'</b> não iniciadas). A família com maior pendência é <b>'+(famTop?(EXP_CAT_LABEL[famTop]||famTop):'—')+'</b>, com <b>'+(famTopN>0?famTopN:0)+'</b> ordens.</p>'
+    +'<p style="margin:0">Em exportação foram enviados <b>'+palTot+'</b> paletes no período, tendo como principal destino <b>'+(paisTop||'—')+'</b> (<b>'+(paisTopN>0?paisTopN:0)+'</b> paletes).</p></div>');
+
+  // KPIs
+  H+='<div class="rp-kpis" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">'
+    +_rpKpi('ORs Pendentes',gv('kpi-pend-or'),'recebimento','#B43A2E')
+    +_rpKpi('Recebido no Mês',gv('kpi-rec-mes'),mesLabel,'#1F8C4D')
+    +_rpKpi('% Alocado',gv('kpi-pct-aloc'),'mês atual','#28507E')
+    +_rpKpi('Passivo Alocação',gv('kpi-pend-aloc'),'ORs','#9F7E2C')
+    +_rpKpi('Ag. Expedição',String(fat.length),'finalizadas','#6A4990')
+    +'</div>';
+
+  // RECEBIMENTO
+  H+='<div class="rp-pagebreak"></div>';
+  H+='<div style="font-size:16px;font-weight:800;color:#0a0a0a;margin:0 0 12px">📦 Módulo Recebimento</div>';
+  H+=sec('Seção 1 — ORs Pendentes por Mês', _rpTable(['Mês','Cadastradas','Recebidas','ORs Pendentes','Acumulado','% Concl.'],s1)+_imgFromCanvas('chart-s1',260));
+  H+=sec('Seção 2 — Recebimentos do Mês Atual', _rpTable(['Data','Cadastradas','Recebidas','Pend. Receb.','Acum. Mês','% Concl.'],s2)+_imgFromCanvas('chart-s2',260));
+  H+=sec('Seção 3 — Pendência de Alocação', _rpTable(['Data (Mapa)','ORs Pendentes','Saldo Acum.'],s3)+_imgFromCanvas('chart-s3',260));
+
+  // EXPEDIÇÃO
+  H+='<div class="rp-pagebreak"></div>';
+  H+='<div style="font-size:16px;font-weight:800;color:#0a0a0a;margin:0 0 12px">🚚 Módulo Expedição</div>';
+  H+=sec('Ordens Finalizadas › Aguardando Expedição (qtde por mês e família)', _rpTable(fatHead,fatRows)+_imgFromCanvas('exp-ch-paradas',260));
+  H+=sec('Movimentação Diária — Mês Atual', _rpTable(['Data','Cadastrado','Separado','Finalizado','Expedido'],movRows)+_imgFromCanvas('exp-ch-geral',260));
+  H+=sec('Paletes Enviados — Exportação por Mês (por país)', _rpTable(['Mês','País','Paletes'],palRows)+_imgFromCanvas('exp-ch-exportacao',260));
+
+  // ANÁLISE / ATENÇÃO / RECOMENDAÇÕES
+  H+='<div class="rp-pagebreak"></div>';
+  const ats=[]; const recs=[];
+  if(mesObj.pend>0){ ats.push('Há '+mesObj.pend+' OR(s) pendente(s) de recebimento em '+mesLabel+'.'); }
+  if(passivo>0){ ats.push('Passivo de alocação com '+passivo+' OR(s) aguardando armazenagem.'); recs.push('Priorizar a alocação das '+passivo+' ORs do passivo para liberar o recebimento.'); }
+  if(famTop&&famTopN>0){ ats.push('Família '+(EXP_CAT_LABEL[famTop]||famTop)+' concentra '+famTopN+' ordens finalizadas aguardando expedição.'); recs.push('Acelerar a expedição da família '+(EXP_CAT_LABEL[famTop]||famTop)+', a de maior fila.'); }
+  if(mesPior&&mesPiorN>0){ ats.push('Mês com maior pendência acumulada de recebimento: '+mpL+' ('+mesPiorN+' ORs).'); }
+  if(!ats.length) ats.push('Sem pontos críticos identificados no período.');
+  if(!recs.length) recs.push('Manter o ritmo atual de recebimento e expedição.');
+  H+=sec('Análise',
+    '<div style="font-size:12px;color:#1A1714;line-height:1.65">O índice de conclusão do recebimento no mês está em <b>'+pctMes+'%</b>. '
+    +'A expedição mantém <b>'+fat.length+'</b> ordens prontas aguardando saída, frente a <b>'+nAnd+'</b> em andamento. '
+    +'A exportação registra <b>'+palTot+'</b> paletes, com concentração em <b>'+(paisTop||'—')+'</b>.</div>');
+  H+=sec('Pontos de Atenção','<ul style="margin:0;padding-left:18px;font-size:12px;color:#1A1714;line-height:1.6">'+ats.map(a=>'<li>'+a+'</li>').join('')+'</ul>');
+  H+=sec('Recomendações','<ul style="margin:0;padding-left:18px;font-size:12px;color:#1A1714;line-height:1.6">'+recs.map(a=>'<li>'+a+'</li>').join('')+'</ul>');
+  H+='<div style="font-size:9.5px;color:#A89C85;text-align:center;margin-top:18px;border-top:1px solid #E2DCCB;padding-top:8px">FAROL Diário Operacional · YBERA / GYP Indústria de Cosméticos — Viana (G9) · Documento gerado automaticamente em '+ts+'</div>';
+
+  let div=document.getElementById('report-print');
+  if(!div){ div=document.createElement('div'); div.id='report-print'; document.body.appendChild(div); }
+  div.style.cssText='font-family:Arial,Helvetica,sans-serif;color:#1A1714;padding:0';
+  div.innerHTML=H;
+}
+
+function gerarPdfPainel(){
+  const rec=document.getElementById('mod-recebimento');
+  const exp=document.getElementById('mod-expedicao');
+  const ana=document.getElementById('mod-analise');
+  const prev={rec:rec?rec.style.display:'',exp:exp?exp.style.display:'',ana:ana?ana.style.display:''};
+  if(rec) rec.style.display='block';
+  if(exp) exp.style.display='block';
+  if(ana) ana.style.display='none';
+  try{ if(typeof renderAll==='function') renderAll(); }catch(e){}
+  try{ if(typeof expRenderAll==='function') expRenderAll(); }catch(e){}
+  if(typeof showToast==='function') showToast('📄 Gerando relatório executivo… escolha "Salvar como PDF".');
+  setTimeout(()=>{
+    try{ _montarRelatorio(); }catch(e){ console.error('relatorio',e); if(typeof showToast==='function') showToast('❌ Erro ao montar relatório.',true); }
+    if(rec) rec.style.display=prev.rec;
+    if(exp) exp.style.display=prev.exp;
+    if(ana) ana.style.display=prev.ana;
+    setTimeout(()=>{ window.print(); }, 150);
+  }, 850);
+}
+
 // ─────────────────────────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────────────────────────
@@ -1736,7 +1996,7 @@ async function carregarDadosRemotos(){
     if(d && (d.rec||d.exp)){
       _aplicarSnapshot(d); _ultimoTs=d.ts||null;
       const ts=d.ts?_fmtTs(new Date(d.ts)):'';
-      ['rec-pub-ts','exp-pub-ts'].forEach(id=>{const el=document.getElementById(id); if(el&&ts){ el.textContent='🕒 Última atualização: '+ts; el.className='pub-timestamp ok'; }});
+      ['rec-pub-ts','exp-pub-ts','ae-pub-ts'].forEach(id=>{const el=document.getElementById(id); if(el&&ts){ el.textContent='🕒 Última atualização: '+ts; el.className='pub-timestamp ok'; }});
       return true;
     }
   }catch(e){ /* sem dados remotos: usa seed embutido */ }
@@ -1849,11 +2109,12 @@ function showToast(msg,err=false){
 
 let expInitialized = false;
 function switchModule(mod){
-  document.getElementById('mod-recebimento').style.display=mod==='recebimento'?'':'none';
-  document.getElementById('mod-expedicao').style.display=mod==='expedicao'?'block':'none';
+  ['recebimento','expedicao','analise'].forEach(m=>{
+    const el=document.getElementById('mod-'+m);
+    if(el) el.style.display = (m===mod) ? 'block' : 'none';
+  });
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  document.getElementById('nav-'+mod).classList.add('active');
-  // Inicializa gráficos da Expedição somente quando o módulo está visível
+  const nav=document.getElementById('nav-'+mod); if(nav) nav.classList.add('active');
   if(mod==='expedicao'){
     setTimeout(()=>{ expRenderAll(); expInitialized=true; }, 50);
   }
