@@ -385,12 +385,8 @@ tbody tr.today-row{background:rgba(59,130,246,.06);}
         </div>
       </div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost" onclick="document.getElementById('file-input').click()">⬆ Arquivo ORs</button>
         <input type="file" id="file-input" accept=".tsv,.txt,.csv,.xlsx,.xls" onchange="importarFile1(event)">
-        <button class="btn btn-ghost" onclick="document.getElementById('file-input2').click()">⬆ Arquivo Alocação</button>
         <input type="file" id="file-input2" accept=".tsv,.txt,.csv,.xlsx,.xls" onchange="importarFile2(event)">
-        <button class="btn btn-clear" onclick="limparBaseRec()" title="Apagar ORs e Alocação carregados">🗑 Limpar Base</button>
-        <span class="topbar-divider"></span>
         <button class="btn btn-excel" onclick="exportarExcel()">📊 Exportar Excel</button>
       </div>
     </div>
@@ -398,17 +394,17 @@ tbody tr.today-row{background:rgba(59,130,246,.06);}
     <!-- Import status bar -->
     <div class="import-bar">
       <span class="import-bar-label">Arquivos</span>
-      <div class="import-chips">
+      <div class="import-chips" style="display:none">
         <span class="import-status warn" id="status-f1">⏳ ORs — aguardando</span>
         <span class="import-status warn" id="status-f2">⏳ Alocação — aguardando</span>
       </div>
-      <div class="import-progress">
+      <div class="import-progress" style="display:none">
         <div class="import-progress-track"><div class="import-progress-fill" id="rec-prog"></div></div>
         <span class="import-progress-txt" id="rec-prog-txt">0 / 2</span>
       </div>
       <div class="import-spacer"></div>
-      <button class="btn-publish" id="btn-pub-rec" onclick="publicarRec()" disabled>🚀 Publicar Atualização</button>
-      <span class="pub-timestamp" id="rec-pub-ts">Última publicação: —</span>
+      <button class="btn-publish" id="btn-pub-rec" onclick="publicarRec()" style="display:none" disabled>🚀 Publicar Atualização</button>
+      <span class="pub-timestamp" id="rec-pub-ts">Última atualização: —</span>
     </div>
 
     <!-- Page content -->
@@ -550,29 +546,25 @@ tbody tr.today-row{background:rgba(59,130,246,.06);}
         </div>
       </div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost" onclick="document.getElementById('exp-file1').click()">⬆ Saída por NF</button>
         <input type="file" id="exp-file1" accept=".tsv,.txt,.csv,.xlsx,.xls" onchange="expImportF1(event)">
-        <button class="btn btn-ghost" onclick="document.getElementById('exp-file2').click()">⬆ Expedição</button>
         <input type="file" id="exp-file2" accept=".tsv,.txt,.csv,.xlsx,.xls" onchange="expImportF2(event)">
-        <button class="btn btn-clear" onclick="limparBaseExp()" title="Apagar bases de Expedição">🗑 Limpar Base</button>
-        <span class="topbar-divider"></span>
         <button class="btn btn-excel" onclick="expExportExcel()">📊 Exportar Excel</button>
       </div>
     </div>
 
     <div class="import-bar">
       <span class="import-bar-label">Arquivos</span>
-      <div class="import-chips">
+      <div class="import-chips" style="display:none">
         <span class="import-status warn" id="exp-status-f1">⏳ Saída por NF — aguardando</span>
         <span class="import-status warn" id="exp-status-f2">⏳ Expedição — aguardando</span>
       </div>
-      <div class="import-progress">
+      <div class="import-progress" style="display:none">
         <div class="import-progress-track"><div class="import-progress-fill" id="exp-prog"></div></div>
         <span class="import-progress-txt" id="exp-prog-txt">0 / 2</span>
       </div>
       <div class="import-spacer"></div>
-      <button class="btn-publish" id="btn-pub-exp" onclick="publicarExp()" disabled>🚀 Publicar Atualização</button>
-      <span class="pub-timestamp" id="exp-pub-ts">Última publicação: —</span>
+      <button class="btn-publish" id="btn-pub-exp" onclick="publicarExp()" style="display:none" disabled>🚀 Publicar Atualização</button>
+      <span class="pub-timestamp" id="exp-pub-ts">Última atualização: —</span>
     </div>
 
     <div class="page">
@@ -1744,7 +1736,7 @@ async function carregarDadosRemotos(){
     if(d && (d.rec||d.exp)){
       _aplicarSnapshot(d); _ultimoTs=d.ts||null;
       const ts=d.ts?_fmtTs(new Date(d.ts)):'';
-      ['rec-pub-ts','exp-pub-ts'].forEach(id=>{const el=document.getElementById(id); if(el&&ts){ el.textContent='✅ Publicado em: '+ts; el.className='pub-timestamp ok'; }});
+      ['rec-pub-ts','exp-pub-ts'].forEach(id=>{const el=document.getElementById(id); if(el&&ts){ el.textContent='🕒 Última atualização: '+ts; el.className='pub-timestamp ok'; }});
       return true;
     }
   }catch(e){ /* sem dados remotos: usa seed embutido */ }
