@@ -1736,15 +1736,17 @@ function gerarExcelExecutivo(){
   Object.keys(bmf).sort().forEach(k=>{ const m=bmf[k]; let tot=0; const row=[m.label]; famPresent.forEach(c=>{ const v=m.fam[c]||0; row.push(v); tot+=v; totFam[c]=(totFam[c]||0)+v; }); row.push(tot); E.push(row); });
   let gtot=0; const totRow=['TOTAL']; famPresent.forEach(c=>{ totRow.push(totFam[c]||0); gtot+=(totFam[c]||0); }); totRow.push(gtot); E.push(totRow);
   E.push([]);
-  E.push(['Movimentação Diária — Mês Atual']);
-  E.push(['Data','Cadastrado','Separado','Expedido']);
+  E.push(['Movimentação Diária — Mês Atual (por categoria)']);
   const now=new Date(), mm=String(now.getMonth()+1).padStart(2,'0'), yy=String(now.getFullYear());
   const inMes=x=>{const p=(x||'').split('/');return p.length===3&&p[1]===mm&&p[2]===yy;};
-  const bd={}, ed=k=>{ if(!bd[k]) bd[k]={cad:0,sep:0,exp:0}; };
-  (EXP_STATE.f1||[]).forEach(o=>{ if(inMes(o.dataCad)){const k=o.dataCad.substring(0,5); ed(k); bd[k].cad++;} });
-  (EXP_STATE.f1||[]).forEach(o=>{ if(inMes(o.dataFat)){const k=o.dataFat.substring(0,5); ed(k); bd[k].sep++;} });
-  (EXP_STATE.f2||[]).forEach(o=>{ if(inMes(o.dataExp)){const k=o.dataExp.substring(0,5); ed(k); bd[k].exp++;} });
-  Object.keys(bd).sort((x,y)=>(+x.split('/')[0])-(+y.split('/')[0])).forEach(k=>{const r=bd[k];E.push([k,r.cad,r.sep,r.exp]);});
+  function _movCat(catFn){ const bd={}, ed=k=>{ if(!bd[k]) bd[k]={cad:0,sep:0,exp:0}; };
+    (EXP_STATE.f1||[]).forEach(o=>{ if(catFn(o)&&inMes(o.dataCad)){const k=o.dataCad.substring(0,5); ed(k); bd[k].cad++;} });
+    (EXP_STATE.f1||[]).forEach(o=>{ if(catFn(o)&&inMes(o.dataFat)){const k=o.dataFat.substring(0,5); ed(k); bd[k].sep++;} });
+    (EXP_STATE.f2||[]).forEach(o=>{ if(catFn(o)&&inMes(o.dataExp)){const k=o.dataExp.substring(0,5); ed(k); bd[k].exp++;} });
+    return bd; }
+  function _pushMov(titulo,bd){ const keys=Object.keys(bd).sort((x,y)=>(+x.split('/')[0])-(+y.split('/')[0])); if(!keys.length) return; E.push([titulo]); E.push(['Data','Cadastrado','Separado','Expedido']); let tc=0,ts=0,te=0; keys.forEach(k=>{const r=bd[k]; E.push([k,r.cad,r.sep,r.exp]); tc+=r.cad;ts+=r.sep;te+=r.exp;}); E.push(['TOTAL',tc,ts,te]); E.push([]); }
+  _pushMov('Geral (todas as categorias)', _movCat(function(){return true;}));
+  EXP_CATS_ALL.forEach(function(c){ _pushMov(EXP_CAT_LABEL[c]||c, _movCat(function(o){return o.cat===c;})); });
   E.push([]);
   E.push(['Paletes Enviados — Exportação por Mês (por país)']);
   E.push(['Mês','País','Paletes (volumes)']);
@@ -1813,11 +1815,14 @@ function _montarRelatorio(){
   // movimentação diária mês atual
   const now=new Date(), mm=String(now.getMonth()+1).padStart(2,'0'), yy=String(now.getFullYear());
   const inMes=x=>{const p=(x||'').split('/');return p.length===3&&p[1]===mm&&p[2]===yy;};
-  const bd={}, ed=k=>{if(!bd[k])bd[k]={cad:0,sep:0,exp:0};};
-  (EXP_STATE.f1||[]).forEach(o=>{if(inMes(o.dataCad)){const k=o.dataCad.substring(0,5);ed(k);bd[k].cad++;}});
-  (EXP_STATE.f1||[]).forEach(o=>{if(inMes(o.dataFat)){const k=o.dataFat.substring(0,5);ed(k);bd[k].sep++;}});
-  (EXP_STATE.f2||[]).forEach(o=>{if(inMes(o.dataExp)){const k=o.dataExp.substring(0,5);ed(k);bd[k].exp++;}});
-  const movRows=Object.keys(bd).sort((x,y)=>(+x.split('/')[0])-(+y.split('/')[0])).map(k=>{const r=bd[k];return[k,r.cad,r.sep,r.exp];});
+  function _movCat(catFn){ const bd={}, ed=k=>{if(!bd[k])bd[k]={cad:0,sep:0,exp:0};};
+    (EXP_STATE.f1||[]).forEach(o=>{if(catFn(o)&&inMes(o.dataCad)){const k=o.dataCad.substring(0,5);ed(k);bd[k].cad++;}});
+    (EXP_STATE.f1||[]).forEach(o=>{if(catFn(o)&&inMes(o.dataFat)){const k=o.dataFat.substring(0,5);ed(k);bd[k].sep++;}});
+    (EXP_STATE.f2||[]).forEach(o=>{if(catFn(o)&&inMes(o.dataExp)){const k=o.dataExp.substring(0,5);ed(k);bd[k].exp++;}});
+    return bd; }
+  function _movTbl(bd){ const keys=Object.keys(bd).sort((x,y)=>(+x.split('/')[0])-(+y.split('/')[0])); if(!keys.length) return ''; let tc=0,ts=0,te=0; const rows=keys.map(k=>{const r=bd[k];tc+=r.cad;ts+=r.sep;te+=r.exp;return[k,r.cad,r.sep,r.exp];}); rows.push(['<b>TOTAL</b>','<b>'+tc+'</b>','<b>'+ts+'</b>','<b>'+te+'</b>']); return _rpTable(['Data','Cadastrado','Separado','Expedido'],rows); }
+  let movHtml=_imgFromCanvas('exp-ch-geral',260)+'<div style="font-weight:700;color:#1A3A5C;margin:8px 0 2px">Geral (todas as categorias)</div>'+_movTbl(_movCat(function(){return true;}));
+  EXP_CATS_ALL.forEach(function(c){ const tb=_movTbl(_movCat(function(o){return o.cat===c;})); if(tb) movHtml+='<div style="font-weight:700;color:#1A3A5C;margin:8px 0 2px">'+(EXP_CAT_LABEL[c]||c)+'</div>'+tb; });
   // paletes export por país
   const isTop=o=>/TOP\s+DISTRIBUIDORA/i.test(o.dest||'');
   const bmp={}, paisTot={}; let palTot=0;
@@ -1866,7 +1871,7 @@ function _montarRelatorio(){
   H+='<div class="rp-pagebreak"></div>';
   H+='<div style="font-size:16px;font-weight:800;color:#0a0a0a;margin:0 0 12px">🚚 Módulo Expedição</div>';
   H+=sec('Ordens Finalizadas › Aguardando Expedição (qtde por mês e família)', _rpTable(fatHead,fatRows)+_imgFromCanvas('exp-ch-paradas',260));
-  H+=sec('Movimentação Diária — Mês Atual', _rpTable(['Data','Cadastrado','Separado','Expedido'],movRows)+_imgFromCanvas('exp-ch-geral',260));
+  H+=sec('Movimentação Diária — Mês Atual (por categoria)', movHtml);
   H+=sec('Paletes Enviados — Exportação por Mês (por país)', _rpTable(['Mês','País','Paletes'],palRows)+_imgFromCanvas('exp-ch-exportacao',260));
 
   // ANÁLISE / ATENÇÃO / RECOMENDAÇÕES
