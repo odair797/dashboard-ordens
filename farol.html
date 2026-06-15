@@ -738,14 +738,15 @@ tbody tr.today-row{background:rgba(59,130,246,.06);}
           <div class="mes-chip" style="border-color:#3b82f6;color:#1e3a8a"><span>📥 Cadastrado</span><span class="chip-val" id="exp-chip-cad" style="color:#60a5fa">—</span></div>
           <div class="mes-chip" style="border-color:#7c3aed;color:#4c1d95"><span>🔧 Separado</span><span class="chip-val" id="exp-chip-sep" style="color:#c084fc">—</span></div>
           <div class="mes-chip" style="border-color:#16a34a;color:#14532d"><span>🚚 Expedido</span><span class="chip-val" id="exp-chip-exp" style="color:#4ade80">—</span></div>
+          <div class="mes-chip" style="border-color:#b43a2e;color:#7f1d1d"><span>📦 Backlog</span><span class="chip-val" id="exp-chip-bk" style="color:#e06b5e">—</span></div>
           <span style="margin-left:auto;font-size:.68rem;color:var(--text3);align-self:center" id="exp-mes-label">—</span>
         </div>
 
         <div id="etab-geral">
           <div class="section-body">
             <div class="table-col">
-              <table id="exp-diario-table"><thead><tr><th>Data</th><th>Cadastrado</th><th>Separado</th><th>Expedido</th></tr></thead>
-              <tbody id="exp-tb-geral"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3);font-size:.76rem">Importe os arquivos para ver dados</td></tr></tbody></table>
+              <table id="exp-diario-table"><thead><tr><th>Data</th><th>Cadastrado</th><th>Separado</th><th>Expedido</th><th style="color:#b43a2e">Backlog</th></tr></thead>
+              <tbody id="exp-tb-geral"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3);font-size:.76rem">Importe os arquivos para ver dados</td></tr></tbody></table>
             </div>
             <div class="chart-col"><div class="chart-wrap"><canvas id="exp-ch-geral"></canvas></div></div>
           </div>
@@ -1755,14 +1756,16 @@ function gerarExcelExecutivo(){
   (function(){
     const now=new Date(), mm=String(now.getMonth()+1).padStart(2,'0'), yy=String(now.getFullYear());
     const inMes=x=>{const p=(x||'').split('/');return p.length===3&&p[1]===mm&&p[2]===yy;};
+    const beforeMes=x=>{const p=(x||'').split('/');return p.length===3&&((+p[2]<+yy)||(+p[2]===+yy&&+p[1]<+mm));};
     function movCat(catFn){ const bd={}, ed=k=>{ if(!bd[k]) bd[k]={cad:0,sep:0,exp:0}; };
       (EXP_STATE.f1||[]).forEach(o=>{ if(catFn(o)&&inMes(o.dataCad)){const k=o.dataCad.substring(0,5); ed(k); bd[k].cad++;} });
       (EXP_STATE.f1||[]).forEach(o=>{ if(catFn(o)&&inMes(o.dataFat)){const k=o.dataFat.substring(0,5); ed(k); bd[k].sep++;} });
       (EXP_STATE.f2||[]).forEach(o=>{ if(catFn(o)&&inMes(o.dataExp)){const k=o.dataExp.substring(0,5); ed(k); bd[k].exp++;} });
       return bd; }
-    function pushMov(titulo,bd){ const keys=Object.keys(bd).sort((x,y)=>(+x.split('/')[0])-(+y.split('/')[0])); if(!keys.length) return; Mv.push([titulo]); Mv.push(['Data','Cadastrado','Separado','Expedido']); let tc=0,ts=0,te=0; keys.forEach(k=>{const r=bd[k]; Mv.push([k,r.cad,r.sep,r.exp]); tc+=r.cad;ts+=r.sep;te+=r.exp;}); Mv.push(['TOTAL',tc,ts,te]); Mv.push([]); }
-    pushMov('Geral (todas as categorias)', movCat(function(){return true;}));
-    EXP_CATS_ALL.forEach(function(c){ pushMov(EXP_CAT_LABEL[c]||c, movCat(function(o){return o.cat===c;})); });
+    function openBk(catFn){ let n=0; (EXP_STATE.f1||[]).forEach(o=>{ if(catFn(o)&&beforeMes(o.dataCad)) n++; }); return n; }
+    function pushMov(titulo,catFn){ const bd=movCat(catFn); const keys=Object.keys(bd).sort((x,y)=>(+x.split('/')[0])-(+y.split('/')[0])); if(!keys.length) return; Mv.push([titulo]); Mv.push(['Data','Cadastrado','Separado','Expedido','Backlog']); let tc=0,ts=0,te=0,bk=openBk(catFn); Mv.push(['Saldo mês anterior','','','',bk]); keys.forEach(k=>{const r=bd[k]; bk=Math.max(0,bk+r.cad-r.exp); Mv.push([k,r.cad,r.sep,r.exp,bk]); tc+=r.cad;ts+=r.sep;te+=r.exp;}); Mv.push(['TOTAL',tc,ts,te,bk]); Mv.push([]); }
+    pushMov('Geral (todas as categorias)', function(){return true;});
+    EXP_CATS_ALL.forEach(function(c){ pushMov(EXP_CAT_LABEL[c]||c, function(o){return o.cat===c;}); });
   })();
   const wsMv=XLSX.utils.aoa_to_sheet(Mv);
   wsMv['!cols']=[{wch:26},{wch:14},{wch:12},{wch:12},{wch:10}];
@@ -1825,14 +1828,16 @@ function _montarRelatorio(){
   // movimentação diária mês atual
   const now=new Date(), mm=String(now.getMonth()+1).padStart(2,'0'), yy=String(now.getFullYear());
   const inMes=x=>{const p=(x||'').split('/');return p.length===3&&p[1]===mm&&p[2]===yy;};
+  const beforeMes=x=>{const p=(x||'').split('/');return p.length===3&&((+p[2]<+yy)||(+p[2]===+yy&&+p[1]<+mm));};
   function _movCat(catFn){ const bd={}, ed=k=>{if(!bd[k])bd[k]={cad:0,sep:0,exp:0};};
     (EXP_STATE.f1||[]).forEach(o=>{if(catFn(o)&&inMes(o.dataCad)){const k=o.dataCad.substring(0,5);ed(k);bd[k].cad++;}});
     (EXP_STATE.f1||[]).forEach(o=>{if(catFn(o)&&inMes(o.dataFat)){const k=o.dataFat.substring(0,5);ed(k);bd[k].sep++;}});
     (EXP_STATE.f2||[]).forEach(o=>{if(catFn(o)&&inMes(o.dataExp)){const k=o.dataExp.substring(0,5);ed(k);bd[k].exp++;}});
     return bd; }
-  function _movTbl(bd){ const keys=Object.keys(bd).sort((x,y)=>(+x.split('/')[0])-(+y.split('/')[0])); if(!keys.length) return ''; let tc=0,ts=0,te=0; const rows=keys.map(k=>{const r=bd[k];tc+=r.cad;ts+=r.sep;te+=r.exp;return[k,r.cad,r.sep,r.exp];}); rows.push(['<b>TOTAL</b>','<b>'+tc+'</b>','<b>'+ts+'</b>','<b>'+te+'</b>']); return _rpTable(['Data','Cadastrado','Separado','Expedido'],rows); }
-  let movHtml=_imgFromCanvas('exp-ch-geral',260)+'<div style="font-weight:700;color:#1A3A5C;margin:8px 0 2px">Geral (todas as categorias)</div>'+_movTbl(_movCat(function(){return true;}));
-  EXP_CATS_ALL.forEach(function(c){ const tb=_movTbl(_movCat(function(o){return o.cat===c;})); if(tb) movHtml+='<div style="font-weight:700;color:#1A3A5C;margin:8px 0 2px">'+(EXP_CAT_LABEL[c]||c)+'</div>'+tb; });
+  function _openBk(catFn){ let n=0; (EXP_STATE.f1||[]).forEach(o=>{ if(catFn(o)&&beforeMes(o.dataCad)) n++; }); return n; }
+  function _movTbl(catFn){ const bd=_movCat(catFn); const keys=Object.keys(bd).sort((x,y)=>(+x.split('/')[0])-(+y.split('/')[0])); if(!keys.length) return ''; let tc=0,ts=0,te=0,bk=_openBk(catFn); const R=v=>'<b style="color:#b43a2e">'+v+'</b>'; const rows=[['Saldo mês anterior','','','',R(bk)]]; keys.forEach(k=>{const r=bd[k]; bk=Math.max(0,bk+r.cad-r.exp); rows.push([k,r.cad,r.sep,r.exp,R(bk)]); tc+=r.cad;ts+=r.sep;te+=r.exp;}); rows.push(['<b>TOTAL</b>','<b>'+tc+'</b>','<b>'+ts+'</b>','<b>'+te+'</b>',R(bk)]); return _rpTable(['Data','Cadastrado','Separado','Expedido','Backlog'],rows); }
+  let movHtml=_imgFromCanvas('exp-ch-geral',260)+'<div style="font-weight:700;color:#1A3A5C;margin:8px 0 2px">Geral (todas as categorias)</div>'+_movTbl(function(){return true;});
+  EXP_CATS_ALL.forEach(function(c){ const tb=_movTbl(function(o){return o.cat===c;}); if(tb) movHtml+='<div style="font-weight:700;color:#1A3A5C;margin:8px 0 2px">'+(EXP_CAT_LABEL[c]||c)+'</div>'+tb; });
   // paletes export por país
   const isTop=o=>/TOP\s+DISTRIBUIDORA/i.test(o.dest||'');
   const bmp={}, paisTot={}; let palTot=0;
@@ -2599,20 +2604,23 @@ function expRenderDiarioTab(tab){
   EXP_STATE.f2.forEach(o=>{ if(matchCat(o.cat)&&inMes(o.dataExp)){ const dk=o.dataExp.substring(0,5); E(dk); byDay[dk].exp++; } });
 
   const days=Object.keys(byDay).sort((a,b)=> (+a.split('/')[0]) - (+b.split('/')[0]) );
-  let totCad=0,totSep=0,totExp=0;
-  days.forEach(dk=>{ const v=byDay[dk]; totCad+=v.cad; totSep+=v.sep; totExp+=v.exp; });
+  let totCad=0,totSep=0,totExp=0; const bkByDay={};
+  let _bk=0; EXP_STATE.f1.forEach(o=>{ if(!matchCat(o.cat)) return; const p=(o.dataCad||'').split('/'); if(p.length<3) return; if((+p[2]<+yyyy)||(+p[2]===+yyyy&&+p[1]<+mm)) _bk++; });
+  const bkOpening=_bk;
+  days.forEach(dk=>{ const v=byDay[dk]; totCad+=v.cad; totSep+=v.sep; totExp+=v.exp; _bk=Math.max(0,_bk+v.cad-v.exp); bkByDay[dk]=_bk; });
 
   const cl=id=>document.getElementById(id);
   if(cl('exp-chip-cad')) cl('exp-chip-cad').textContent=totCad||'0';
   if(cl('exp-chip-sep')) cl('exp-chip-sep').textContent=totSep||'0';
   if(cl('exp-chip-exp')) cl('exp-chip-exp').textContent=totExp||'0';
+  if(cl('exp-chip-bk')) cl('exp-chip-bk').textContent=(days.length?bkByDay[days[days.length-1]]:0);
   if(cl('exp-mes-label')) cl('exp-mes-label').textContent=mesLabel;
   if(cl('exp-diario-badge')) cl('exp-diario-badge').textContent=totCad||'—';
 
   const tb=document.getElementById('exp-tb-geral');
   if(tb){
     if(!days.length){
-      tb.innerHTML=`<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3);font-size:.76rem">Sem dados para ${mesLabel}</td></tr>`;
+      tb.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3);font-size:.76rem">Sem dados para ${mesLabel}</td></tr>`;
     } else {
       tb.innerHTML=days.map(dk=>{
         const v=byDay[dk]; const isToday=(dk===todayDiaKey());
@@ -2621,6 +2629,7 @@ function expRenderDiarioTab(tab){
           <td><span class="pill pill-blue">${v.cad}</span></td>
           <td><span class="pill pill-purple">${v.sep}</span></td>
           <td><span class="pill pill-green">${v.exp}</span></td>
+          <td><span class="pill" style="background:#f2d8d4;color:#b43a2e;font-weight:800">${bkByDay[dk]}</span></td>
         </tr>`;
       }).join('');
     }
@@ -2637,6 +2646,7 @@ function expRenderDiarioTab(tab){
           {label:'Cadastrado',data:days.map(d=>byDay[d].cad),backgroundColor:'rgba(96,165,250,.75)',borderRadius:4},
           {label:'Separado',  data:days.map(d=>byDay[d].sep),backgroundColor:'rgba(192,132,252,.75)',borderRadius:4},
           {label:'Expedido',  data:days.map(d=>byDay[d].exp),backgroundColor:'rgba(74,222,128,.75)',borderRadius:4},
+          {type:'line',label:'Backlog',data:days.map(d=>bkByDay[d]),borderColor:'rgba(180,58,46,.95)',backgroundColor:'rgba(180,58,46,.95)',borderWidth:2,pointRadius:2,tension:.25,fill:false},
         ]},
         options:{ responsive:true,maintainAspectRatio:false,
           plugins:{legend:{labels:{color:'#64748b',font:{size:10}}},tooltip:{mode:'index',intersect:false}},
