@@ -745,7 +745,7 @@ tbody tr.today-row{background:rgba(59,130,246,.06);}
         <div id="etab-geral">
           <div class="section-body">
             <div class="table-col">
-              <table id="exp-diario-table"><thead><tr><th>Data</th><th>Cadastrado</th><th>Separado</th><th>Expedido</th><th style="color:#b43a2e">Backlog</th></tr></thead>
+              <table id="exp-diario-table"><thead><tr><th>Data</th><th>Cadastrado</th><th>Separado</th><th>Expedido</th><th id="exp-th-bk" style="color:#b43a2e">Backlog</th></tr></thead>
               <tbody id="exp-tb-geral"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3);font-size:.76rem">Importe os arquivos para ver dados</td></tr></tbody></table>
             </div>
             <div class="chart-col"><div class="chart-wrap"><canvas id="exp-ch-geral"></canvas></div></div>
@@ -2596,24 +2596,36 @@ function expRenderDiarioTab(tab){
   const matchCat=cat=> _selCats===null ? true : _selCats.includes(cat);
   const inMes=d=>{ const p=(d||'').split('/'); return p.length===3 && p[1]===mm && p[2]===yyyy; };
 
+  // Base unificada de Cadastrado: toda NF que entrou (Saida/F1 uniao Expedido/F2), sem duplicar NF.
+  // Backlog = entrou (cadastrado) - saiu (expedido), acumulado, com a mesma base de NFs nas duas pontas.
+  const _cadByNf={};
+  EXP_STATE.f1.forEach(o=>{ if(matchCat(o.cat)&&o.dataCad){ const k=String(o.nf); if(!(k in _cadByNf)) _cadByNf[k]=o.dataCad; } });
+  EXP_STATE.f2.forEach(o=>{ if(matchCat(o.cat)&&o.dataCad){ const k=String(o.nf); if(!(k in _cadByNf)) _cadByNf[k]=o.dataCad; } });
+
   const byDay={};
   const E=dk=>{ if(!byDay[dk]) byDay[dk]={cad:0,sep:0,exp:0}; };
-  // Cadastrado no dia (F1) / Separado = enviado p/ faturamento (F1) / Expedido = processado (F2)
-  EXP_STATE.f1.forEach(o=>{ if(matchCat(o.cat)&&inMes(o.dataCad)){ const dk=o.dataCad.substring(0,5); E(dk); byDay[dk].cad++; } });
+  // Cadastrado = entrada (base unificada por NF) / Separado = enviado p/ faturamento (F1) / Expedido = processado (F2)
+  Object.values(_cadByNf).forEach(d=>{ if(inMes(d)){ const dk=d.substring(0,5); E(dk); byDay[dk].cad++; } });
   EXP_STATE.f1.forEach(o=>{ if(matchCat(o.cat)&&inMes(o.dataFat)){ const dk=o.dataFat.substring(0,5); E(dk); byDay[dk].sep++; } });
   EXP_STATE.f2.forEach(o=>{ if(matchCat(o.cat)&&inMes(o.dataExp)){ const dk=o.dataExp.substring(0,5); E(dk); byDay[dk].exp++; } });
 
   const days=Object.keys(byDay).sort((a,b)=> (+a.split('/')[0]) - (+b.split('/')[0]) );
+  const isCur = (mm === String(now.getMonth()+1).padStart(2,'0'));
   let totCad=0,totSep=0,totExp=0; const bkByDay={};
-  let _bk=0; EXP_STATE.f1.forEach(o=>{ if(!matchCat(o.cat)) return; const p=(o.dataCad||'').split('/'); if(p.length<3) return; if((+p[2]<+yyyy)||(+p[2]===+yyyy&&+p[1]<+mm)) _bk++; });
-  const bkOpening=_bk;
+  // Carry-in = entrou - saiu nos meses anteriores (mesma base unificada)
+  const _antes=d=>{ const p=(d||'').split('/'); if(p.length<3) return false; return (+p[2]<+yyyy)||(+p[2]===+yyyy&&+p[1]<+mm); };
+  let _cadAnt=0,_expAnt=0;
+  Object.values(_cadByNf).forEach(d=>{ if(_antes(d)) _cadAnt++; });
+  EXP_STATE.f2.forEach(o=>{ if(matchCat(o.cat)&&_antes(o.dataExp)) _expAnt++; });
+  let _bk=Math.max(0,_cadAnt-_expAnt);
   days.forEach(dk=>{ const v=byDay[dk]; totCad+=v.cad; totSep+=v.sep; totExp+=v.exp; _bk=Math.max(0,_bk+v.cad-v.exp); bkByDay[dk]=_bk; });
+  const _thbk=document.getElementById('exp-th-bk'); if(_thbk) _thbk.style.display='';
 
   const cl=id=>document.getElementById(id);
   if(cl('exp-chip-cad')) cl('exp-chip-cad').textContent=totCad||'0';
   if(cl('exp-chip-sep')) cl('exp-chip-sep').textContent=totSep||'0';
   if(cl('exp-chip-exp')) cl('exp-chip-exp').textContent=totExp||'0';
-  if(cl('exp-chip-bk')) cl('exp-chip-bk').textContent=(days.length?bkByDay[days[days.length-1]]:0);
+  { const _bkc=cl('exp-chip-bk'); if(_bkc){ _bkc.textContent=(days.length?bkByDay[days[days.length-1]]:0); const _bx=_bkc.closest('.mes-chip'); if(_bx) _bx.style.display=''; } }
   if(cl('exp-mes-label')) cl('exp-mes-label').textContent=mesLabel;
   if(cl('exp-diario-badge')) cl('exp-diario-badge').textContent=totCad||'—';
 
