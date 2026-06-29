@@ -1234,8 +1234,8 @@ function calcAlocMes(){
   const mes=STATE.byMes[STATE.mesAtual]||{rec:0};
   const totalMap=mes.rec||0;
   const alocMap=Math.max(totalMap-pendMap,0);
-  const pctPend=totalMap>0?Math.round(pendMap/totalMap*100):0;
-  const pctAloc=totalMap>0?Math.round(alocMap/totalMap*100):0;
+  const pctPend=totalMap>0?+(pendMap/totalMap*100).toFixed(1):0;
+  const pctAloc=totalMap>0?+(alocMap/totalMap*100).toFixed(1):0;
   return {pendMap,alocMap,totalMap,pctPend,pctAloc};
 }
 function renderKPIs(){
@@ -1298,7 +1298,7 @@ function renderS1(){
   s1Data=sorted.map(([k,d])=>{
     acum+=d.pend;
     const [y,m]=k.split('-');
-    const pct=d.cad>0?Math.round((d.rec/d.cad)*100):0;
+    const pct=d.cad>0?+((d.rec/d.cad)*100).toFixed(1):0;
     return{key:k,label:`${MESES_LABEL[m]}/${y.slice(2)}`,cad:d.cad,rec:d.rec,pend:d.pend,acum,pct};
   });
   document.getElementById('s1-badge').textContent=`${s1Data.length} meses`;
@@ -1369,7 +1369,7 @@ function renderS2(mesFiltro){
   let acum=0;
   s2Data=dias.map(([k,d])=>{
     acum+=d.rec;
-    const pct=d.cad>0?Math.round((d.rec/d.cad)*100):0;
+    const pct=d.cad>0?+((d.rec/d.cad)*100).toFixed(1):0;
     return{key:k,cad:d.cad,rec:d.rec,pendRec:d.pendRec,acum,pct};
   });
   renderS2Table(s2Data);
@@ -1804,7 +1804,7 @@ function _montarRelatorio(){
   const ts=hoje.toLocaleDateString('pt-BR')+' '+hoje.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   const ma=(STATE.mesAtual||'').split('-'); const mesLabel=ma.length===2?(mp[(+ma[1])-1]+'/'+ma[0]):'—';
   const mesObj=STATE.byMes[STATE.mesAtual]||{cad:0,rec:0,pend:0};
-  const pctMes=mesObj.cad?Math.round(mesObj.rec/mesObj.cad*100):0;
+  const pctMes=mesObj.cad?+(mesObj.rec/mesObj.cad*100).toFixed(1):0;
   let pendTot=0; let mesPior=null,mesPiorN=-1;
   Object.entries(STATE.byMes).forEach(([k,d])=>{ pendTot+=d.pend; if(d.pend>mesPiorN){mesPiorN=d.pend;mesPior=k;} });
   const passivo=Object.keys(STATE.alocPend||{}).length;
